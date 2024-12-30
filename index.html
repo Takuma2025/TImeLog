@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>QRコードリーダー</title>
+  <style>
+    /* 必要に応じてスタイルを調整 */
+    #video {
+      width: 100%;
+      max-width: 600px;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <h1>メインのカメラページ</h1>
+  
+  <!-- カメラ映像 -->
+  <video id="video" playsinline autoplay></video>
+  
+  <!-- スキャン用Canvas（表示しないでもOK）-->
+  <canvas id="canvas" style="display: none;"></canvas>
+  
+  <!-- 結果を表示 -->
+  <div>結果: <span id="output"></span></div>
+  
+  <!-- ライブラリ & スクリプト -->
+  <script src="jsQR.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

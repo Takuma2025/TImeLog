@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>読み取り結果</title>
+</head>
+<body>
+  <h1>リンク先を自動で開きます</h1>
+  <p id="info"></p>
+
+  <iframe id="linkFrame" style="width: 100%; height: 80vh;"></iframe>
+
+  <script>
+    // URLパラメータから data=... を取得
+    const params = new URLSearchParams(location.search);
+    const data = params.get('data') || "";
+
+    // データを表示
+    const infoElem = document.getElementById('info');
+    infoElem.textContent = `読み取ったデータ: ${data}`;
+
+    // リンクだったらiframeで表示 & 5秒後にタブを閉じる
+    if (/^https?:\/\//.test(data)) {
+      // iframe内で読み取り先URLを開く
+      const linkFrame = document.getElementById('linkFrame');
+      linkFrame.src = data;
+
+      // 5秒後に自動でタブを閉じる
+      setTimeout(() => {
+        window.close();
+      }, 5000);
+    } else {
+      // 単なる文字列ならiframeに表示しても仕方ないので
+      // 表示だけして自動で閉じるなど
+      setTimeout(() => {
+        window.close();
+      }, 5000);
+    }
+  </script>
+</body>
+</html>
