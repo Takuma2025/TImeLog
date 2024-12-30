@@ -2,13 +2,55 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>読み取り結果</title>
+  <title>記録しました</title>
+  <style>
+    body {
+      background-color: #005CAC;
+      color: #FFFFFF;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      padding: 20px;
+      box-sizing: border-box;
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      font-size: 2em;
+    }
+
+    #info {
+      margin-bottom: 20px;
+      padding: 15px;
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      width: 100%;
+      max-width: 600px;
+      word-wrap: break-word;
+      font-size: 1.2em;
+    }
+
+    /* レスポンシブ対応 */
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.5em;
+      }
+
+      #info {
+        font-size: 1em;
+        padding: 10px;
+      }
+    }
+  </style>
 </head>
 <body>
-  <h1>リンク先を自動で開きます</h1>
+  <h1>記録しました</h1>
   <p id="info"></p>
-
-  <iframe id="linkFrame" style="width: 100%; height: 80vh;"></iframe>
 
   <script>
     // URLパラメータから data=... を取得
@@ -19,23 +61,11 @@
     const infoElem = document.getElementById('info');
     infoElem.textContent = `読み取ったデータ: ${data}`;
 
-    // リンクだったらiframeで表示 & 5秒後にタブを閉じる
-    if (/^https?:\/\//.test(data)) {
-      // iframe内で読み取り先URLを開く
-      const linkFrame = document.getElementById('linkFrame');
-      linkFrame.src = data;
-
-      // 5秒後に自動でタブを閉じる
-      setTimeout(() => {
-        window.close();
-      }, 5000);
-    } else {
-      // 単なる文字列ならiframeに表示しても仕方ないので
-      // 表示だけして自動で閉じるなど
-      setTimeout(() => {
-        window.close();
-      }, 5000);
-    }
+    // 5秒後に自動でタブを閉じる
+    setTimeout(() => {
+      window.close();
+    }, 5000);
   </script>
 </body>
 </html>
+

@@ -3,13 +3,14 @@ const video = document.getElementById('video');
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const output = document.getElementById('output');
+const scanningIndicator = document.getElementById('scanningIndicator');
 
 // 連続で同じQRを読み取ってタブを量産しないよう制御
 let lastScannedData = null;
 let resetTimerId = null;
 
 // カメラ起動
-navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
   .then(stream => {
     video.srcObject = stream;
     video.play();
@@ -18,6 +19,7 @@ navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
   .catch(err => {
     console.error("カメラ取得エラー:", err);
     output.textContent = "カメラを利用できません: " + err.message;
+    scanningIndicator.style.display = 'none';
   });
 
 /**
@@ -40,6 +42,7 @@ function scanLoop() {
       if (code.data !== lastScannedData) {
         lastScannedData = code.data;
         output.textContent = code.data;
+        scanningIndicator.style.display = 'none';
 
         // 別タブを開く。「newtab.html?data=◯◯」にクエリパラメータを渡す
         const newTabUrl = `newtab.html?data=${encodeURIComponent(code.data)}`;
@@ -49,6 +52,7 @@ function scanLoop() {
         if (resetTimerId) clearTimeout(resetTimerId);
         resetTimerId = setTimeout(() => {
           lastScannedData = null;
+          scanningIndicator.style.display = 'block';
         }, 5000);
       }
     }
