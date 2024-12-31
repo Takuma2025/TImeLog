@@ -235,7 +235,7 @@
       }
       
       // カメラ起動
-      navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }) // 背面カメラを使用
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } }) // フロントカメラを使用
         .then(stream => {
           video.srcObject = stream;
           video.play();
@@ -271,9 +271,11 @@
               // スキャンの安定性を確認
               if (code.data === lastScannedData) {
                 scanCount += 1;
+                console.log(`同じQRコード "${code.data}" が連続して検出されました (${scanCount}回目)`);
               } else {
                 lastScannedData = code.data;
                 scanCount = 1;
+                console.log(`新しいQRコード "${code.data}" が検出されました`);
               }
       
               if (scanCount >= scanThreshold && !isHandlingScan && (resultTab === null || resultTab.closed)) {
@@ -316,6 +318,7 @@
             // QRコードが検出されていない場合はリセット
             lastScannedData = null;
             scanCount = 0;
+            console.log("QRコードが検出されていません");
           }
         }
         // 次フレームでも解析を継続
