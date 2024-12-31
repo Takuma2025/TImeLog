@@ -38,8 +38,7 @@
       width: 0; /* 幅を0に設定 */
       height: 0; /* 高さを0に設定 */
       border: none; /* 枠線を削除 */
-      display: none; /* 完全に非表示にする場合はこのまま */
-      /* display: none; の場合、iframe を読み込むために JavaScript で表示を一時的に解除する必要があります */
+      display: none; /* 完全に非表示にする */
     }
 
     /* レスポンシブ対応 */
@@ -73,33 +72,27 @@
     const infoElem = document.getElementById('info');
     infoElem.textContent = `読み取ったデータ: ${data}`;
 
-    // リンクだったらiframeで読み込み、画面には表示しない & 5秒後にタブを閉じる
+    // リンクだったらiframeで読み込み、画面には表示しない & 2秒後にタブを閉じる
     if (/^https?:\/\//.test(data)) {
       // iframe内で読み取り先URLを開く
       const linkFrame = document.getElementById('linkFrame');
       linkFrame.src = data;
-      // 以下の行を削除またはコメントアウトして表示を変更しない
-      // linkFrame.style.display = 'block';
+      // iframeは非表示のまま
 
-      // iframeの読み込みが完了したことを確認したい場合はイベントリスナーを追加
-      /*
-      linkFrame.onload = () => {
-        console.log('iframe loaded:', data);
-      };
-      */
-
-      // 5秒後に自動でタブを閉じる
+      // 2秒後に自動でタブを閉じる
       setTimeout(() => {
+        // window.close() はスクリプトで開いたウィンドウのみ閉じることができます
         window.close();
-      }, 5000);
+      }, 2000); // 2秒後に閉じる
     } else {
-      // 単なる文字列ならiframeに表示しても仕方ないので
-      // 表示だけして自動で閉じるなど
+      // 単なる文字列なら表示だけして自動で閉じる
       setTimeout(() => {
         window.close();
-      }, 5000);
+      }, 2000); // 2秒後に閉じる
     }
   </script>
 </body>
 </html>
+
+
 

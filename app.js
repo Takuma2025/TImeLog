@@ -9,6 +9,9 @@ const scanningIndicator = document.getElementById('scanningIndicator');
 let lastScannedData = null;
 let resetTimerId = null;
 
+// スキャン制御用のフラグを追加
+let isHandlingScan = false;
+
 // カメラ起動
 navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
   .then(stream => {
@@ -38,8 +41,9 @@ function scanLoop() {
     const code = jsQR(imageData.data, imageData.width, imageData.height);
 
     if (code) {
-      // 前回と同じデータなら無視 (短時間で何度も開かないように)
-      if (code.data !== lastScannedData) {
+      // スキャン処理中でないこと、かつ新しいデータであることを確認
+      if (code.data !== lastScannedData && !isHandlingScan) {
+        isHandlingScan = true; // スキャン処理中に設定
         lastScannedData = code.data;
         output.textContent = code.data;
         scanningIndicator.style.display = 'none';
@@ -48,15 +52,18 @@ function scanLoop() {
         const newTabUrl = `newtab.html?data=${encodeURIComponent(code.data)}`;
         window.open(newTabUrl, "_blank");
 
-        // 5秒後に、同じQRコードも再び読み取れるようにリセット
-        if (resetTimerId) clearTimeout(resetTimerId);
+        // 即座に lastScannedData をリセットして、同じQRコードの連続スキャンを防止
+        // さらに、スキャン処理を一時停止
+        clearTimeout(resetTimerId);
         resetTimerId = setTimeout(() => {
+          isHandlingScan = false; // スキャン処理中フラグをリセット
           lastScannedData = null;
           scanningIndicator.style.display = 'block';
-        }, 5000);
+        }, 5000); // 5秒後に再スキャンを許可
       }
     }
   }
   // 次フレームでも解析を継続
   requestAnimationFrame(scanLoop);
 }
+

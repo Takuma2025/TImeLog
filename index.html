@@ -196,10 +196,67 @@
     
     <!-- ライブラリ & スクリプト -->
     <script src="jsQR.min.js"></script>
-    <script src="app.js"></script>
-    
-    <!-- 現在時刻を更新するスクリプト -->
     <script>
+      // 要素取得
+      const video = document.getElementById('video');
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
+      const output = document.getElementById('output');
+      const scanningIndicator = document.getElementById('scanningIndicator');
+      
+      // スキャン制御用のフラグを追加
+      let isHandlingScan = false;
+      
+      // カメラ起動
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+        .then(stream => {
+          video.srcObject = stream;
+          video.play();
+          requestAnimationFrame(scanLoop);
+        })
+        .catch(err => {
+          console.error("カメラ取得エラー:", err);
+          output.textContent = "カメラを利用できません: " + err.message;
+          scanningIndicator.style.display = 'none';
+        });
+      
+      /**
+       * 毎フレーム呼ばれてQRコードを読み取るループ
+       */
+      function scanLoop() {
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+      
+          // ビデオ映像をCanvasに描画
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+          // ピクセルデータを取得してjsQRで解析
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const code = jsQR(imageData.data, imageData.width, imageData.height);
+      
+          if (code && !isHandlingScan) {
+            // スキャン処理中に設定（即座にフラグを設定）
+            isHandlingScan = true;
+            output.textContent = code.data;
+            scanningIndicator.style.display = 'none';
+      
+            // 別タブを開く。「newtab.html?data=◯◯」にクエリパラメータを渡す
+            const newTabUrl = `newtab.html?data=${encodeURIComponent(code.data)}`;
+            window.open(newTabUrl, "resultTab"); // 名前付きウィンドウを使用
+      
+            // スキャン処理をリセットするタイマーを設定
+            setTimeout(() => {
+              isHandlingScan = false; // スキャン処理中フラグをリセット
+              output.textContent = "スキャン中...";
+              scanningIndicator.style.display = 'block';
+            }, 2000); // 2秒後に再スキャンを許可（必要に応じて調整）
+          }
+        }
+        // 次フレームでも解析を継続
+        requestAnimationFrame(scanLoop);
+      }
+      
       // 現在時刻を取得して表示する関数
       function updateCurrentTime() {
         const now = new Date();
@@ -221,6 +278,3 @@
   </div>
 </body>
 </html>
-
-
-
