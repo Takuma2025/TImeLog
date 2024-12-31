@@ -159,32 +159,104 @@
     }
 
     /* レスポンシブ対応 */
-    @media (max-width: 600px) {
+    @media (max-width: 768px) {
+      /* コンテナの幅を100%に変更 */
+      .container {
+        padding: 20px;
+        width: 100%;
+        max-width: 100%;
+      }
+
+      /* 見出しのフォントサイズを調整 */
       h1 {
         font-size: 1.8em;
       }
 
       h2 {
-        font-size: 1.3em;
+        font-size: 1.4em;
       }
 
+      /* カメラ映像のサイズを100%にして、最大幅を600pxに設定 */
+      #video {
+        width: 100%;
+        max-width: 600px;
+      }
+
+      /* 結果表示エリアのフォントサイズとパディングを調整 */
       #output {
-        font-size: 1.1em;
+        font-size: 1.2em;
         padding: 12px;
       }
 
+      /* スキャン中のインジケーターのフォントサイズを調整 */
       #scanningIndicator {
         font-size: 1em;
       }
 
+      /* 現在時刻の表示部分の調整 */
+      #currentTime {
+        font-size: 1.1em;
+      }
+
+      /* 現在時刻の数字部分のスタイルを調整 */
+      #currentTime .time {
+        font-size: 1.8em; /* 画面が少し小さくなるので、少し大きく設定 */
+      }
+
+      /* ボタンのサイズを調整 */
+      .link-button {
+        font-size: 1.1em;
+        padding: 12px 24px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      /* コンテナのパディングと幅を調整 */
+      .container {
+        padding: 15px;
+        width: 100%;
+      }
+
+      /* 見出しのフォントサイズをさらに小さく */
+      h1 {
+        font-size: 1.6em;
+      }
+
+      h2 {
+        font-size: 1.2em;
+      }
+
+      /* カメラ映像のサイズを100%に変更 */
+      #video {
+        width: 100%;
+        max-width: 100%;
+      }
+
+      /* 結果表示エリアのフォントサイズを小さくして調整 */
+      #output {
+        font-size: 1.1em;
+        padding: 10px;
+      }
+
+      /* スキャン中のインジケーターのフォントサイズを調整 */
+      #scanningIndicator {
+        font-size: 0.9em;
+      }
+
+      /* 現在時刻の表示部分のフォントサイズを調整 */
       #currentTime {
         font-size: 1em;
       }
 
-      /* 現在時刻の数字部分のスタイル（レスポンシブ対応） */
+      /* 現在時刻の数字部分のスタイルを調整 */
       #currentTime .time {
-        font-size: 1.5em; /* 小さい画面では少し小さく */
-        font-family: Arial, sans-serif; /* Arialフォントを適用 */ /* ここも変更 */
+        font-size: 1.5em;
+      }
+
+      /* ボタンのサイズを調整 */
+      .link-button {
+        font-size: 1em;
+        padding: 10px 20px;
       }
     }
   </style>
@@ -244,7 +316,6 @@
       // スキャンのクリーンアップ間隔と有効期間
       const CLEANUP_INTERVAL = 60000; // 1分ごとにクリーンアップ
       const SCAN_COOLDOWN = 60000; // 1分間のクールダウン
-      
       // スキャンの安定性確認用
       let lastScannedData = null;
       let scanCount = 0;
@@ -390,4 +461,5 @@
   </div>
 </body>
 </html>
+
 
