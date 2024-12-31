@@ -4,10 +4,11 @@
   <meta charset="UTF-8">
   <title>QRコード読み取り</title>
   <style>
+    /* 基本設定 */
     body {
       background-color: #005CAC;
       color: #FFFFFF;
-      font-family: Arial, sans-serif;
+      font-family: "メイリオ", meiryo, sans-serif;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -18,73 +19,208 @@
       box-sizing: border-box;
     }
 
-    h1 {
-      margin-bottom: 20px;
+    /* コンテナのスタイル */
+    .container {
+      background-color: rgba(255, 255, 255, 0.1);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+      max-width: 700px;
+      width: 100%;
       text-align: center;
     }
 
+    /* 見出しのスタイル */
+    h1, h2 {
+      margin: 10px 0;
+      font-weight: normal;
+    }
+
+    h1 {
+      font-size: 2em;
+      margin-bottom: 20px;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+      padding-bottom: 10px;
+    }
+
+    h2 {
+      font-size: 1.5em;
+      color: #FFFFFF;
+      margin-bottom: 20px;
+    }
+
+    /* 「TOPΣ」を強調するスタイル */
+    .highlight {
+      font-family: 'Century', 'Times New Roman', Times, serif;
+      font-weight: bold;
+    }
+
+    /* カメラ映像のスタイル */
     #video {
       width: 100%;
       max-width: 600px;
-      border: 2px solid #FFFFFF;
-      border-radius: 8px;
+      border: 3px solid #FFFFFF;
+      border-radius: 12px;
       background-color: #000;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+      transition: transform 0.3s ease;
     }
 
+    #video:hover {
+      transform: scale(1.02);
+    }
+
+    /* スキャン結果とインジケーターの親要素のスタイル */
+    .scan-status {
+      display: flex;
+      flex-direction: column;
+      align-items: center; /* 水平中央揃え */
+      justify-content: center; /* 垂直中央揃え */
+      margin-top: 25px; /* 適宜調整 */
+    }
+
+    /* 結果表示エリアのスタイル */
     #output {
-      display: block;
-      margin-top: 20px;
-      padding: 10px;
+      padding: 15px;
       background-color: rgba(255, 255, 255, 0.2);
-      border-radius: 4px;
+      border-radius: 8px;
       width: 100%;
       max-width: 600px;
       word-wrap: break-word;
       text-align: center;
-      font-size: 1.2em;
+      font-size: 1.3em;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      transition: background-color 0.3s ease, transform 0.3s ease;
+      margin-bottom: 10px; /* 子要素間のスペースを調整 */
     }
 
-    /* スキャン中のインジケーター */
+    #output:hover {
+      background-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+
+    /* スキャン中のインジケーターのスタイル */
     #scanningIndicator {
-      margin-top: 10px;
       width: 100%;
       max-width: 600px;
       text-align: center;
-      font-size: 1em;
-      color: #FFD700;
+      font-size: 1.1em;
+      color: #FFFFFF;
+      font-style: italic;
+      animation: pulse 2s infinite;
+    }
+
+    /* 現在時刻のスタイル */
+    #currentTime {
+      margin-top: 20px;
+      font-size: 1.2em;
+      color: #FFFFFF; /* 白色 */
+    }
+
+    /* 現在時刻の数字部分のスタイル */
+    #currentTime .time {
+      font-size: 2em; /* フォントサイズを大きく設定 */
+      font-family: 'Century', 'Times New Roman', Times, serif; /* Centuryフォントを適用 */
+    }
+
+    /* アニメーション定義 */
+    @keyframes pulse {
+      0% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.6;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+
+    /* スキャン用Canvas（表示しない） */
+    #canvas {
+      display: none;
     }
 
     /* レスポンシブ対応 */
     @media (max-width: 600px) {
       h1 {
-        font-size: 1.5em;
+        font-size: 1.8em;
+      }
+
+      h2 {
+        font-size: 1.3em;
       }
 
       #output {
+        font-size: 1.1em;
+        padding: 12px;
+      }
+
+      #scanningIndicator {
         font-size: 1em;
+      }
+
+      #currentTime {
+        font-size: 1em;
+      }
+
+      /* 現在時刻の数字部分のスタイル（レスポンシブ対応） */
+      #currentTime .time {
+        font-size: 1.5em; /* 小さい画面では少し小さく */
       }
     }
   </style>
 </head>
 <body>
-  <h2>TOPΣ自習時間打刻システム</h2>
-  <h2>QRコード読み取りカメラ</h2>
-  
-  <!-- カメラ映像 -->
-  <video id="video" playsinline autoplay></video>
-  
-  <!-- スキャン用Canvas（表示しないでもOK）-->
-  <canvas id="canvas" style="display: none;"></canvas>
-  
-  <!-- 結果を表示 -->
-  <div id="output">スキャン中...</div>
-  
-  <!-- スキャン中のインジケーター -->
-  <div id="scanningIndicator">QRコードをスキャンしています...</div>
-  
-  <!-- ライブラリ & スクリプト -->
-  <script src="jsQR.min.js"></script>
-  <script src="app.js"></script>
+  <div class="container">
+    <h1><span class="highlight">TOPΣ</span>自習時間打刻システム</h1>
+    <h2>QRコード読み取りカメラ</h2>
+    
+    <!-- 現在時刻を表示する要素 -->
+    <div id="currentTime"></div>
+    
+    <!-- カメラ映像 -->
+    <video id="video" playsinline autoplay></video>
+    
+    <!-- スキャン用Canvas（表示しない） -->
+    <canvas id="canvas"></canvas>
+    
+    <!-- スキャン結果とインジケーターをラップする親要素 -->
+    <div class="scan-status">
+      <!-- 結果を表示 -->
+      <div id="output">スキャン中...</div>
+      
+      <!-- スキャン中のインジケーター -->
+      <div id="scanningIndicator">QRコードをスキャンしています...</div>
+    </div>
+    
+    <!-- ライブラリ & スクリプト -->
+    <script src="jsQR.min.js"></script>
+    <script src="app.js"></script>
+    
+    <!-- 現在時刻を更新するスクリプト -->
+    <script>
+      // 現在時刻を取得して表示する関数
+      function updateCurrentTime() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const formattedTime = `${hours}:${minutes}:${seconds}`;
+        
+        // 数字部分を<span>で囲んでinnerHTMLに設定
+        document.getElementById('currentTime').innerHTML = `現在時刻: <span class="time">${formattedTime}</span>`;
+      }
+
+      // ページ読み込み時に時刻を表示し、1秒ごとに更新
+      window.onload = function() {
+        updateCurrentTime(); // 初回表示
+        setInterval(updateCurrentTime, 1000); // 1秒ごとに更新
+      };
+    </script>
+  </div>
 </body>
 </html>
+
+
 

@@ -35,12 +35,11 @@
     }
 
     iframe {
-      width: 100%;
-      max-width: 800px;
-      height: 60vh;
-      border: 2px solid #FFFFFF;
-      border-radius: 8px;
-      background-color: #000;
+      width: 0; /* 幅を0に設定 */
+      height: 0; /* 高さを0に設定 */
+      border: none; /* 枠線を削除 */
+      display: none; /* 完全に非表示にする場合はこのまま */
+      /* display: none; の場合、iframe を読み込むために JavaScript で表示を一時的に解除する必要があります */
     }
 
     /* レスポンシブ対応 */
@@ -54,7 +53,7 @@
       }
 
       iframe {
-        height: 50vh;
+        height: 0; /* 高さを0に設定 */
       }
     }
   </style>
@@ -74,12 +73,20 @@
     const infoElem = document.getElementById('info');
     infoElem.textContent = `読み取ったデータ: ${data}`;
 
-    // リンクだったらiframeで表示 & 5秒後にタブを閉じる
+    // リンクだったらiframeで読み込み、画面には表示しない & 5秒後にタブを閉じる
     if (/^https?:\/\//.test(data)) {
       // iframe内で読み取り先URLを開く
       const linkFrame = document.getElementById('linkFrame');
       linkFrame.src = data;
-      linkFrame.style.display = 'block';
+      // 以下の行を削除またはコメントアウトして表示を変更しない
+      // linkFrame.style.display = 'block';
+
+      // iframeの読み込みが完了したことを確認したい場合はイベントリスナーを追加
+      /*
+      linkFrame.onload = () => {
+        console.log('iframe loaded:', data);
+      };
+      */
 
       // 5秒後に自動でタブを閉じる
       setTimeout(() => {
@@ -95,3 +102,4 @@
   </script>
 </body>
 </html>
+
