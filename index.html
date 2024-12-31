@@ -55,6 +55,23 @@
       font-weight: bold;
     }
 
+    /* ボタンのスタイル */
+    .link-button {
+      display: inline-block;
+      background-color: #FF8C00;
+      color: #FFFFFF;
+      padding: 15px 30px;
+      font-size: 1.2em;
+      text-decoration: none;
+      border-radius: 8px;
+      margin-top: 30px;
+      transition: background-color 0.3s ease;
+    }
+
+    .link-button:hover {
+      background-color: #FF6A00;
+    }
+
     /* カメラ映像のスタイル */
     #video {
       width: 100%;
@@ -177,28 +194,32 @@
     <!-- ロゴ画像を追加 -->
     <img src="rogo.png.png" alt="自習時間記録システムのロゴ" style="max-width: 300px; margin-bottom: none;">
 
-    
     <h1>自習時間記録システム</h1>
     <h2>QRコード読み取りカメラ</h2>
-    
+
     <!-- 現在時刻を表示する要素 -->
     <div id="currentTime"></div>
-    
+
     <!-- カメラ映像 -->
     <video id="video" playsinline autoplay></video>
-    
+
     <!-- スキャン用Canvas（表示しない） -->
     <canvas id="canvas"></canvas>
-    
+
     <!-- スキャン結果とインジケーターをラップする親要素 -->
     <div class="scan-status">
       <!-- 結果を表示 -->
       <div id="output">スキャン中...</div>
-      
+
       <!-- スキャン中のインジケーター -->
       <div id="scanningIndicator">QRコードをスキャンしています...</div>
     </div>
-    
+
+    <!-- リンクボタン -->
+    <a href="https://docs.google.com/spreadsheets/d/1_M5ibTnC6_8KIAPUswae9bgFcEEYMFi7zgGLXHmhzl0/edit?gid=2029476429#gid=2029476429" class="link-button" target="_blank">
+      自習時間ランキングを見る
+    </a>
+
     <!-- ライブラリ & スクリプト -->
     <script src="jsQR.min.js"></script>
     <script>
@@ -369,3 +390,4 @@
   </div>
 </body>
 </html>
+
