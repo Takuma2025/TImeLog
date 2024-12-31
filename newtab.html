@@ -81,18 +81,29 @@
 
       // 2秒後に自動でタブを閉じる
       setTimeout(() => {
-        // window.close() はスクリプトで開いたウィンドウのみ閉じることができます
+        // 親ウィンドウにタブ閉鎖を通知
+        if (window.opener && typeof window.opener.notifyTabClosed === 'function') {
+          window.opener.notifyTabClosed();
+        }
+        // ウィンドウを閉じる
         window.close();
       }, 2000); // 2秒後に閉じる
     } else {
       // 単なる文字列なら表示だけして自動で閉じる
       setTimeout(() => {
+        // 親ウィンドウにタブ閉鎖を通知
+        if (window.opener && typeof window.opener.notifyTabClosed === 'function') {
+          window.opener.notifyTabClosed();
+        }
+        // ウィンドウを閉じる
         window.close();
       }, 2000); // 2秒後に閉じる
     }
   </script>
 </body>
 </html>
+
+
 
 
 

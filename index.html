@@ -204,11 +204,38 @@
       const output = document.getElementById('output');
       const scanningIndicator = document.getElementById('scanningIndicator');
       
-      // スキャン制御用のフラグを追加
+      // スキャン制御用のフラグとタブ参照
       let isHandlingScan = false;
+      let resultTab = null;
+      
+      // デバウンス用のタイムスタンプと間隔
+      let lastScannedTime = 0;
+      const debounceInterval = 60000; // 1分 (60000ミリ秒)
+      
+      // スキャン履歴を管理するMapオブジェクト
+      const scanHistory = new Map();
+      
+      // スキャンのクリーンアップ間隔と有効期間
+      const CLEANUP_INTERVAL = 60000; // 1分ごとにクリーンアップ
+      const SCAN_COOLDOWN = 60000; // 1分間のクールダウン
+      
+      // スキャンの安定性確認用
+      let lastScannedData = null;
+      let scanCount = 0;
+      const scanThreshold = 3; // 3フレーム連続で同じデータが検出された場合にスキャンを確定
+      
+      /**
+       * 新しいタブが閉じられた際に呼び出される関数
+       */
+      function notifyTabClosed() {
+        resultTab = null;
+        isHandlingScan = false;
+        output.textContent = "スキャン中...";
+        scanningIndicator.style.display = 'block';
+      }
       
       // カメラ起動
-      navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }) // 背面カメラを使用
         .then(stream => {
           video.srcObject = stream;
           video.play();
@@ -235,27 +262,81 @@
           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
           const code = jsQR(imageData.data, imageData.width, imageData.height);
       
-          if (code && !isHandlingScan) {
-            // スキャン処理中に設定（即座にフラグを設定）
-            isHandlingScan = true;
-            output.textContent = code.data;
-            scanningIndicator.style.display = 'none';
+          if (code) {
+            const currentTime = Date.now();
+            const lastScanTime = scanHistory.get(code.data) || 0;
       
-            // 別タブを開く。「newtab.html?data=◯◯」にクエリパラメータを渡す
-            const newTabUrl = `newtab.html?data=${encodeURIComponent(code.data)}`;
-            window.open(newTabUrl, "resultTab"); // 名前付きウィンドウを使用
+            // スキャンが許可されるかチェック
+            if (currentTime - lastScanTime > SCAN_COOLDOWN) {
+              // スキャンの安定性を確認
+              if (code.data === lastScannedData) {
+                scanCount += 1;
+              } else {
+                lastScannedData = code.data;
+                scanCount = 1;
+              }
       
-            // スキャン処理をリセットするタイマーを設定
-            setTimeout(() => {
-              isHandlingScan = false; // スキャン処理中フラグをリセット
-              output.textContent = "スキャン中...";
-              scanningIndicator.style.display = 'block';
-            }, 2000); // 2秒後に再スキャンを許可（必要に応じて調整）
+              if (scanCount >= scanThreshold && !isHandlingScan && (resultTab === null || resultTab.closed)) {
+                // スキャン処理中に設定（即座にフラグを設定）
+                isHandlingScan = true;
+                scanHistory.set(code.data, currentTime); // スキャン時刻を更新
+                output.textContent = code.data;
+                scanningIndicator.style.display = 'none';
+          
+                // 別タブを開く。「newtab.html?data=◯◯」にクエリパラメータを渡す
+                const newTabUrl = `newtab.html?data=${encodeURIComponent(code.data)}`;
+                resultTab = window.open(newTabUrl, "resultTab"); // 名前付きウィンドウを使用
+          
+                if (resultTab) {
+                  // タブが正常に開かれた場合
+                  console.log("新しいタブを開きました:", newTabUrl);
+                } else {
+                  // ポップアップブロックなどでタブが開けなかった場合
+                  console.error("タブを開けませんでした。ポップアップブロックが有効か確認してください。");
+                  isHandlingScan = false;
+                  scanningIndicator.style.display = 'block';
+                  output.textContent = "タブを開けませんでした。ポップアップブロックを確認してください。";
+                }
+          
+                // スキャン処理をリセットするタイマーを設定（念のため）
+                setTimeout(() => {
+                  // フラグがリセットされていない場合は強制的にリセット
+                  if (isHandlingScan) {
+                    isHandlingScan = false;
+                    output.textContent = "スキャン中...";
+                    scanningIndicator.style.display = 'block';
+                  }
+                }, 5000); // 5秒後に再スキャンを許可（必要に応じて調整）
+              }
+            } else {
+              // クールダウン中のスキャンを無視
+              console.log(`QRコード "${code.data}" はクールダウン中のためスキャンを無視しました。`);
+            }
+          } else {
+            // QRコードが検出されていない場合はリセット
+            lastScannedData = null;
+            scanCount = 0;
           }
         }
         // 次フレームでも解析を継続
         requestAnimationFrame(scanLoop);
       }
+      
+      /**
+       * スキャン履歴をクリーンアップする関数
+       */
+      function cleanupScanHistory() {
+        const currentTime = Date.now();
+        for (const [data, timestamp] of scanHistory.entries()) {
+          if (currentTime - timestamp > SCAN_COOLDOWN) {
+            scanHistory.delete(data);
+            console.log(`スキャン履歴から "${data}" を削除しました。`);
+          }
+        }
+      }
+
+      // クリーンアップを定期的に実行
+      setInterval(cleanupScanHistory, CLEANUP_INTERVAL);
       
       // 現在時刻を取得して表示する関数
       function updateCurrentTime() {
@@ -274,6 +355,9 @@
         updateCurrentTime(); // 初回表示
         setInterval(updateCurrentTime, 1000); // 1秒ごとに更新
       };
+      
+      // グローバルスコープで notifyTabClosed 関数を公開
+      window.notifyTabClosed = notifyTabClosed;
     </script>
   </div>
 </body>
