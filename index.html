@@ -120,7 +120,7 @@
     /* 現在時刻の数字部分のスタイル */
     #currentTime .time {
       font-size: 2em; /* フォントサイズを大きく設定 */
-      font-family: 'Century', 'Times New Roman', Times, serif; /* Centuryフォントを適用 */
+      font-family: Arial, sans-serif; /* Arialフォントを適用 */ /* ここを変更 */
     }
 
     /* アニメーション定義 */
@@ -167,13 +167,18 @@
       /* 現在時刻の数字部分のスタイル（レスポンシブ対応） */
       #currentTime .time {
         font-size: 1.5em; /* 小さい画面では少し小さく */
+        font-family: Arial, sans-serif; /* Arialフォントを適用 */ /* ここも変更 */
       }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1><span class="highlight">TOPΣ</span>自習時間打刻システム</h1>
+    <!-- ロゴ画像を追加 -->
+    <img src="rogo.png.png" alt="自習時間記録システムのロゴ" style="max-width: 300px; margin-bottom: none;">
+
+    
+    <h1>自習時間記録システム</h1>
     <h2>QRコード読み取りカメラ</h2>
     
     <!-- 現在時刻を表示する要素 -->
@@ -223,7 +228,6 @@
       let lastScannedData = null;
       let scanCount = 0;
       const scanThreshold = 3; // 3フレーム連続で同じデータが検出された場合にスキャンを確定
-      
       /**
        * 新しいタブが閉じられた際に呼び出される関数
        */
