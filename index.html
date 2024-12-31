@@ -73,19 +73,16 @@
     }
 
     /* カメラ映像のスタイル */
-    #video {
-      width: 100%;
-      max-width: 600px;
-      border: 3px solid #FFFFFF;
-      border-radius: 12px;
-      background-color: #000;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-      transition: transform 0.3s ease;
-    }
-
-    #video:hover {
-      transform: scale(1.02);
-    }
+/* カメラ映像のスタイル */
+#video {
+  width: 100%;
+  height: auto; /* 高さを自動調整 */
+  max-width: 600px; /* 最大幅を600pxに設定 */
+  border: 3px solid #FFFFFF;
+  border-radius: 12px;
+  background-color: #000;
+  transition: transform 0.3s ease;
+}
 
     /* スキャン結果とインジケーターの親要素のスタイル */
     .scan-status {
@@ -178,6 +175,25 @@
       #currentTime .time {
         font-size: 1.5em; /* 小さい画面では少し小さく */
         font-family: Arial, sans-serif; /* Arialフォントを適用 */ /* ここも変更 */
+      }
+    }
+
+    /* QRコードをスキャン中のインジケーターのスタイル */
+    #scanningIndicator {
+      font-size: 1.5em;
+      animation: fadeInOut 1.5s ease-in-out infinite; /* 1.5秒の間隔でフェードイン・フェードアウトを繰り返す */
+    }
+
+    /* アニメーション定義 */
+    @keyframes fadeInOut {
+      0% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.6;
+      }
+      100% {
+        opacity: 1;
       }
     }
   </style>
