@@ -223,8 +223,8 @@
 
     <!-- スキャン結果とインジケーターをラップする親要素 -->
     <div class="scan-status">
-      <!-- 結果を表示 -->
-      <div id="output"></div>
+      <!-- 結果を表示しない -->
+      <div id="output" style="display: none;"></div>
 
       <!-- スキャン中のインジケーター -->
       <div id="scanningIndicator">QRコードをスキャンしています...</div>
@@ -245,7 +245,6 @@ const beepSound = new Audio('https://takuma2025.github.io/TimeLog/assets/beep.mp
 function playBeepSound() {
   beepSound.play(); // 音を再生
 }
-
 
       // 要素取得
       const video = document.getElementById('video');
@@ -322,7 +321,7 @@ function playBeepSound() {
                 // スキャン処理中に設定（即座にフラグを設定）  
                 isHandlingScan = true;
                 scanHistory.set(code.data, currentTime); // スキャン時刻を更新
-                output.textContent = code.data;
+                output.textContent = ''; // 結果を消去
                 scanningIndicator.style.display = 'none';
 
                 // ビープ音を鳴らす
@@ -343,7 +342,7 @@ function playBeepSound() {
                   output.textContent = "タブを開けませんでした。ポップアップブロックを確認してください。";
                 }
           
-                // スキャン処理をリセットするタイマーを設定（念のため）
+                // スキャン処理をリセットするタイマーを設定（念のため）  
                 setTimeout(() => {
                   // フラグがリセットされていない場合は強制的にリセット
                   if (isHandlingScan) {
@@ -408,6 +407,7 @@ function playBeepSound() {
   </div>
 </body>
 </html>
+
 
 
 
