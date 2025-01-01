@@ -238,13 +238,13 @@
     <!-- ライブラリ & スクリプト -->
     <script src="jsQR.min.js"></script>
     <script>
-// GitHub Pagesにアップロードした音声ファイルを正しいURLで指定
-const beepSound = new Audio('https://takuma2025.github.io/TimeLog/assets/beep.mp3'); // ここをGitHub PagesのURLに変更
+      // ビープ音の再生用のオーディオオブジェクトを作成
+      const beepSound = new Audio('assets/beep.mp3'); // beep.mp3をassetsフォルダ内から読み込む
 
-// スキャンしたQRコードでビープ音を鳴らす関数
-function playBeepSound() {
-  beepSound.play(); // 音を再生
-}
+      // スキャンしたQRコードでビープ音を鳴らす関数
+      function playBeepSound() {
+        beepSound.play(); // 音を再生
+      }
 
       // 要素取得
       const video = document.getElementById('video');
@@ -259,14 +259,14 @@ function playBeepSound() {
       
       // デバウンス用のタイムスタンプと間隔
       let lastScannedTime = 0;
-      const debounceInterval = 60000; // 1分 (60000ミリ秒)
+      const debounceInterval = 8000; // 8秒 (8000ミリ秒)
       
       // スキャン履歴を管理するMapオブジェクト
       const scanHistory = new Map();
       
       // スキャンのクリーンアップ間隔と有効期間
-      const CLEANUP_INTERVAL = 60000; // 1分ごとにクリーンアップ
-      const SCAN_COOLDOWN = 60000; // 1分間のクールダウン
+      const CLEANUP_INTERVAL = 8000; // 8秒ごとにクリーンアップ
+      const SCAN_COOLDOWN = 8000; // 8秒分間のクールダウン
      
       // スキャンの安定性確認用
       let lastScannedData = null;
@@ -407,12 +407,3 @@ function playBeepSound() {
   </div>
 </body>
 </html>
-
-
-
-
-
-
-
-
-

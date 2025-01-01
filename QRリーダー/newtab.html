@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>読み取り結果</title>
+  <title>自習時間記録</title>
   <style>
     body {
       background-color: #005CAC;
@@ -25,24 +25,34 @@
       font-weight: normal;
     }
 
-    #info {
+    #message {
+      font-size: 2em;  /* メッセージのフォントサイズを少し大きく設定 */
+      margin-bottom: 10px;
+      font-weight: normal;  /* 太字を解除 */
+    }
+
+    #status-container {
       margin-bottom: 20px;
       padding: 20px;
-      background-color: rgba(255, 255, 255, 0.2);
       border-radius: 8px;
       width: 100%;
       max-width: 600px;
       font-weight: normal;
       word-wrap: break-word;
-      font-size: 2em; /* 生徒コードのフォントサイズを大きく設定 */
+      font-size: 2em; /* ステータスのフォントサイズを大きく設定 */
       text-align: center; /* 中央揃え */
+      background-color: rgba(255, 255, 255, 0.2);
+      transition: background-color 0.5s ease;
     }
 
-    iframe {
-      width: 0;
-      height: 0;
-      border: none;
-      display: none;
+    #studentId {
+      font-size: 1.5em;
+      margin-top: 20px;
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      padding: 15px;
+      max-width: 600px;
+      word-wrap: break-word;
     }
 
     @media (max-width: 600px) {
@@ -50,66 +60,99 @@
         font-size: 1.5em;
       }
 
-      #info {
+      #status-container, #studentId {
         font-size: 1.5em; /* スマホなどでは少し小さく設定 */
       }
 
-      iframe {
-        height: 0;
+      #message {
+        font-size: 1.5em; /* スマホなどでは少し小さく設定 */
       }
     }
   </style>
 </head>
 <body>
-  <h1>記録しました</h1>
-  <p id="info"></p>
+  <!-- コンテナの上に表示するメッセージ -->
+  <div id="message"></div>
 
-  <iframe id="linkFrame" style="display: none;"></iframe>
+  <!-- 自習時間記録のステータス表示部分 -->
+  <div id="status-container">
+    <div id="status"></div>
+  </div>
+
+  <!-- 生徒IDの表示部分 -->
+  <div id="studentId"></div>
 
   <script>
-    // URLパラメータから data=... を取得
+    // URLパラメータからQRコードのデータを取得
     const params = new URLSearchParams(location.search);
     const data = params.get('data') || "";
 
-    // studentIdを抽出する関数
-    function extractStudentIdFromUrl(url) {
-      try {
-        const urlObj = new URL(url);
-        const studentId = urlObj.searchParams.get('studentId'); // studentIdパラメータを取得
-        return studentId || '生徒コードが見つかりません';
-      } catch (error) {
-        return '無効なURL';
-      }
-    }
+    // スキャン回数をローカルストレージから取得
+    let scanCount = parseInt(localStorage.getItem('scanCount')) || 0;
 
-    // データがURLならstudentIdを抽出して表示
-    const infoElem = document.getElementById('info');
-    if (/^https?:\/\//.test(data)) {
-      const studentId = extractStudentIdFromUrl(data);
-      infoElem.textContent = `生徒コード: ${studentId}`;
+    // スキャン回数を更新
+    scanCount++;
 
-      const linkFrame = document.getElementById('linkFrame');
-      linkFrame.src = data;
+    // スキャン回数が奇数か偶数かで表示を切り替え
+    const statusElem = document.getElementById('status');
+    const statusContainer = document.getElementById('status-container');
+    const messageElem = document.getElementById('message');  // メッセージを表示する要素を取得
 
-      setTimeout(() => {
-        if (window.opener && typeof window.opener.notifyTabClosed === 'function') {
-          window.opener.notifyTabClosed();
-        }
-        window.close();
-      }, 2000);
+    if (scanCount % 2 !== 0) {
+      statusElem.innerHTML = "<strong>開始</strong>";  // 奇数回目、太字で表示
+      statusContainer.style.backgroundColor = 'green';  // 自習開始は緑
+      messageElem.textContent = "今日もがんばろう！";  // メッセージを表示
     } else {
-      // 単なる文字列ならそのまま表示
-      infoElem.textContent = `読み取ったデータ: ${data}`;
-      setTimeout(() => {
-        if (window.opener && typeof window.opener.notifyTabClosed === 'function') {
-          window.opener.notifyTabClosed();
-        }
-        window.close();
-      }, 2000);
+      statusElem.innerHTML = "<strong>終了</strong>";  // 偶数回目、太字で表示
+      statusContainer.style.backgroundColor = 'red';  // 自習終了は赤
+      messageElem.textContent = "おつかれさま！";  // メッセージを表示
     }
+
+    // 生徒IDをURLデータから抽出する関数
+    function extractStudentId(data) {
+      const match = data.match(/studentId=(\S+)/);
+      return match ? match[1] : '生徒コードが見つかりません';
+    }
+
+    // QRコードのデータから生徒IDを抽出して表示
+    const studentId = extractStudentId(data);
+    const studentIdElem = document.getElementById('studentId');
+    studentIdElem.textContent = `生徒コード: ${studentId}`;
+
+    // QRコードのデータ（studentId）をGoogle Apps Scriptに送信
+    const encodedStudentId = encodeURIComponent(studentId);
+    const scriptUrl = `https://script.google.com/macros/s/AKfycbwtddx4r-dHvX4e9y3IcSFToJLtKgoD_qWv8y7OoJYguGQSYXOxhcuFnMoKENw2wfQv/exec?studentId=${encodedStudentId}`;
+
+    // fetch APIを使ってGoogle Apps Scriptにデータを送信
+    fetch(scriptUrl)
+      .then(response => response.text())
+      .then(data => {
+        console.log("スプレッドシートに記録されました:", data);
+      })
+      .catch(error => {
+        console.error("エラーが発生しました:", error);
+      });
+
+    // スキャン回数をローカルストレージに保存
+    localStorage.setItem('scanCount', scanCount);
+
+    // 2秒後に親ウィンドウへ通知し、タブを閉じる
+    setTimeout(() => {
+      if (window.opener && typeof window.opener.notifyTabClosed === 'function') {
+        window.opener.notifyTabClosed();
+      }
+      window.close();
+    }, 4000);
   </script>
 </body>
 </html>
+
+
+
+
+
+
+
 
 
 
