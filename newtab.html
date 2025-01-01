@@ -119,6 +119,20 @@
     const studentIdElem = document.getElementById('studentId');
     studentIdElem.textContent = `生徒コード: ${studentId}`;
 
+    // QRコードのデータ（studentId）をGoogle Apps Scriptに送信
+    const encodedStudentId = encodeURIComponent(studentId);
+    const scriptUrl = `https://script.google.com/macros/s/AKfycbwtddx4r-dHvX4e9y3IcSFToJLtKgoD_qWv8y7OoJYguGQSYXOxhcuFnMoKENw2wfQv/exec?studentId=${encodedStudentId}`;
+
+    // fetch APIを使ってGoogle Apps Scriptにデータを送信
+    fetch(scriptUrl)
+      .then(response => response.text())
+      .then(data => {
+        console.log("スプレッドシートに記録されました:", data);
+      })
+      .catch(error => {
+        console.error("エラーが発生しました:", error);
+      });
+
     // スキャン回数をローカルストレージに保存
     localStorage.setItem('scanCount', scanCount);
 
@@ -132,6 +146,7 @@
   </script>
 </body>
 </html>
+
 
 
 
