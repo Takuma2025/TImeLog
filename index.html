@@ -259,14 +259,14 @@
       
       // デバウンス用のタイムスタンプと間隔
       let lastScannedTime = 0;
-      const debounceInterval = 20000; // 20秒 (20000ミリ秒)
+      const debounceInterval = 8000; // 8秒 (8000ミリ秒)
       
       // スキャン履歴を管理するMapオブジェクト
       const scanHistory = new Map();
       
       // スキャンのクリーンアップ間隔と有効期間
-      const CLEANUP_INTERVAL = 20000; // 20秒ごとにクリーンアップ
-      const SCAN_COOLDOWN = 20000; // 20秒分間のクールダウン
+      const CLEANUP_INTERVAL = 8000; // 8秒ごとにクリーンアップ
+      const SCAN_COOLDOWN = 8000; // 8秒分間のクールダウン
      
       // スキャンの安定性確認用
       let lastScannedData = null;
