@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>QRコード読み取り</title>
+  <style>
+    /* 基本設定 */
+    body {
+      background-color: #005CAC;
+      color: #FFFFFF;
+      font-family: "メイリオ", meiryo, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    /* コンテナのスタイル */
+    .container {
+      background-color: rgba(255, 255, 255, 0.1);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+      max-width: 700px;
+      width: 100%;
+      text-align: center;
+    }
+
+    /* 見出しのスタイル */
+    h1, h2 {
+      margin: 10px 0;
+      font-weight: normal;
+    }
+
+    h1 {
+      font-size: 2em;
+      margin-bottom: 20px;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+      padding-bottom: 10px;
+    }
+
+    h2 {
+      font-size: 1.5em;
+      color: #FFFFFF;
+      margin-bottom: 20px;
+    }
+
+    /* 「TOPΣ」を強調するスタイル */
+    .highlight {
+      font-family: 'Century', 'Times New Roman', Times, serif;
+      font-weight: bold;
+    }
+
+    /* ボタンのスタイル */
+    .link-button {
+      display: inline-block;
+      background-color: #ffffff;
+      color: #005CAC;
+      padding: 15px 30px;
+      font-size: 1.2em;
+      text-decoration: none;
+      border-radius: 8px;
+      margin-top: 30px;
+      transition: background-color 0.3s ease;
+    }
+
+    .link-button:hover {
+      background-color: rgb(207, 207, 207);
+    }
+
+    /* カメラ映像のスタイル */
+    #video {
+      width: 100%;
+      height: auto; /* 高さを自動調整 */
+      max-width: 600px; /* 最大幅を600pxに設定 */
+      border: 3px solid #FFFFFF;
+      border-radius: 12px;
+      background-color: #000;
+      transition: transform 0.3s ease;
+    }
+
+    /* スキャン結果とインジケーターの親要素のスタイル */
+    .scan-status {
+      display: flex;
+      flex-direction: column;
+      align-items: center; /* 水平中央揃え */
+      justify-content: center; /* 垂直中央揃え */
+      margin-top: 25px; /* 適宜調整 */
+    }
+
+    /* 現在時刻のスタイル */
+    #currentTime {
+      margin-top: 20px;
+      font-size: 1.2em;
+      color: #FFFFFF; /* 白色 */
+    }
+
+    /* 現在時刻の数字部分のスタイル */
+    #currentTime .time {
+      font-size: 2em; /* フォントサイズを大きく設定 */
+      font-family: Arial, sans-serif; /* Arialフォントを適用 */ /* ここを変更 */
+    }
+
+    /* アニメーション定義 */
+    @keyframes pulse {
+      0% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.6;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+
+    /* スキャン用Canvas（表示しない） */
+    #canvas {
+      display: none;
+    }
+
+    /* 動く横線のスタイル */
+    .scan-line {
+      position: absolute;
+      top: 50%; /* 画面の垂直方向中央に配置 */
+      left: 50%; /* 横線を中央揃えにする */
+      width: 86%; /* 横線の幅を80%に設定（少し短くする） */
+      height: 5px;
+      background-color: rgba(255, 255, 255, 0.8);
+      animation: scanLineAnimation 4s infinite linear; /* 4秒に変更 */
+      transform: translateX(-50%) translateY(-50%); /* 中央揃え */
+    }
+
+    /* 横線のアニメーション（上下に動く） */
+    @keyframes scanLineAnimation {
+      0% {
+        top: 0;
+      }
+      50% {
+        top: 98%;
+      }
+      100% {
+        top: 0;
+      }
+    }
+
+    /* レスポンシブ対応 */
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.8em;
+      }
+
+      h2 {
+        font-size: 1.3em;
+      }
+
+      #output {
+        font-size: 1.1em;
+        padding: 12px;
+      }
+
+      #scanningIndicator {
+        font-size: 1em;
+      }
+
+      #currentTime {
+        font-size: 1em;
+      }
+
+      /* 現在時刻の数字部分のスタイル（レスポンシブ対応） */
+      #currentTime .time {
+        font-size: 1.5em; /* 小さい画面では少し小さく */
+        font-family: Arial, sans-serif; /* Arialフォントを適用 */ /* ここも変更 */
+      }
+    }
+
+    /* QRコードをスキャン中のインジケーターのスタイル */
+    #scanningIndicator {
+      font-size: 1.5em;
+      animation: fadeInOut 1.5s ease-in-out infinite; /* 1.5秒の間隔でフェードイン・フェードアウトを繰り返す */
+    }
+
+    /* アニメーション定義 */
+    @keyframes fadeInOut {
+      0% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.6;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- ロゴ画像を追加 -->
+    <img src="rogo.png.png" alt="自習時間記録システムのロゴ" style="max-width: 300px; margin-bottom: none;">
+
+    <h1>自習時間記録システム</h1>
+
+    <!-- 現在時刻を表示する要素（位置を変更） -->
+    <div id="currentTime"></div>
+
+    <!-- QRコード読み取りカメラの見出し（位置を変更） -->
+    <h2>▼QRコード読み取りカメラ▼</h2>
+
+    <!-- カメラ映像 -->
+    <div id="video-container" style="position: relative;">
+      <video id="video" playsinline autoplay></video>
+      <!-- 動く横線を追加 -->
+      <div class="scan-line"></div>
+    </div>
+
+    <!-- スキャン用Canvas（表示しない） -->
+    <canvas id="canvas"></canvas>
+
+    <!-- スキャン結果とインジケーターをラップする親要素 -->
+    <div class="scan-status">
+      <!-- 結果を表示 -->
+      <div id="output"></div>
+
+      <!-- スキャン中のインジケーター -->
+      <div id="scanningIndicator">QRコードをスキャンしています...</div>
+    </div>
+
+    <!-- リンクボタン -->
+    <a href="https://docs.google.com/spreadsheets/d/1_M5ibTnC6_8KIAPUswae9bgFcEEYMFi7zgGLXHmhzl0/edit?gid=2029476429#gid=2029476429" class="link-button" target="_blank">
+      自習時間ランキングを見る
+    </a>
+
+    <!-- ライブラリ & スクリプト -->
+    <script src="jsQR.min.js"></script>
+    <script>
+      // ビープ音の再生用のオーディオオブジェクトを作成
+      const beepSound = new Audio('assets/beep.mp3'); // beep.mp3をassetsフォルダ内から読み込む
+
+      // スキャンしたQRコードでビープ音を鳴らす関数
+      function playBeepSound() {
+        beepSound.play(); // 音を再生
+      }
+
+      // 要素取得
+      const video = document.getElementById('video');
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
+      const output = document.getElementById('output');
+      const scanningIndicator = document.getElementById('scanningIndicator');
+      
+      // スキャン制御用のフラグとタブ参照
+      let isHandlingScan = false;
+      let resultTab = null;
+      
+      // デバウンス用のタイムスタンプと間隔
+      let lastScannedTime = 0;
+      const debounceInterval = 60000; // 1分 (60000ミリ秒)
+      
+      // スキャン履歴を管理するMapオブジェクト
+      const scanHistory = new Map();
+      
+      // スキャンのクリーンアップ間隔と有効期間
+      const CLEANUP_INTERVAL = 60000; // 1分ごとにクリーンアップ
+      const SCAN_COOLDOWN = 60000; // 1分間のクールダウン
+     
+      // スキャンの安定性確認用
+      let lastScannedData = null;
+      let scanCount = 0;
+      const scanThreshold = 3; // 3フレーム連続で同じデータが検出された場合にスキャンを確定
+
+      // カメラ起動
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } }) // フロントカメラを使用
+        .then(stream => {
+          video.srcObject = stream;
+          video.play();
+          requestAnimationFrame(scanLoop);
+        })
+        .catch(err => {
+          console.error("カメラ取得エラー:", err);
+          output.textContent = "カメラを利用できません: " + err.message;
+          scanningIndicator.style.display = 'none';
+        });
+
+      /**
+       * 毎フレーム呼ばれてQRコードを読み取るループ
+       */
+      function scanLoop() {
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+      
+          // ビデオ映像をCanvasに描画
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+          // ピクセルデータを取得してjsQRで解析
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const code = jsQR(imageData.data, imageData.width, imageData.height);
+      
+          if (code) {
+            const currentTime = Date.now();
+            const lastScanTime = scanHistory.get(code.data) || 0;
+      
+            // スキャンが許可されるかチェック
+            if (currentTime - lastScanTime > SCAN_COOLDOWN) {
+              // スキャンの安定性を確認
+              if (code.data === lastScannedData) {
+                scanCount += 1;
+                console.log(`同じQRコード "${code.data}" が連続して検出されました (${scanCount}回目)`);
+              } else {
+                lastScannedData = code.data;
+                scanCount = 1;
+                console.log(`新しいQRコード "${code.data}" が検出されました`);
+              }
+      
+              if (scanCount >= scanThreshold && !isHandlingScan && (resultTab === null || resultTab.closed)) {
+                // スキャン処理中に設定（即座にフラグを設定）  
+                isHandlingScan = true;
+                scanHistory.set(code.data, currentTime); // スキャン時刻を更新
+                output.textContent = code.data;
+                scanningIndicator.style.display = 'none';
+
+                // ビープ音を鳴らす
+                playBeepSound();
+
+                // 別タブを開く。「newtab.html?data=◯◯」にクエリパラメータを渡す
+                const newTabUrl = `newtab.html?data=${encodeURIComponent(code.data)}`;
+                resultTab = window.open(newTabUrl, "resultTab"); // 名前付きウィンドウを使用
+          
+                if (resultTab) {
+                  // タブが正常に開かれた場合
+                  console.log("新しいタブを開きました:", newTabUrl);
+                } else {
+                  // ポップアップブロックなどでタブが開けなかった場合
+                  console.error("タブを開けませんでした。ポップアップブロックが有効か確認してください。");
+                  isHandlingScan = false;
+                  scanningIndicator.style.display = 'block';
+                  output.textContent = "タブを開けませんでした。ポップアップブロックを確認してください。";
+                }
+          
+                // スキャン処理をリセットするタイマーを設定（念のため）
+                setTimeout(() => {
+                  // フラグがリセットされていない場合は強制的にリセット
+                  if (isHandlingScan) {
+                    isHandlingScan = false;
+                    output.textContent = "";
+                    scanningIndicator.style.display = 'block';
+                  }
+                }, 5000); // 5秒後に再スキャンを許可（必要に応じて調整）
+              }
+            } else {
+              // クールダウン中のスキャンを無視
+              console.log(`QRコード "${code.data}" はクールダウン中のためスキャンを無視しました。`);
+            }
+          } else {
+            // QRコードが検出されていない場合はリセット
+            lastScannedData = null;
+            scanCount = 0;
+            console.log("QRコードが検出されていません");
+          }
+        }
+        // 次フレームでも解析を継続
+        requestAnimationFrame(scanLoop);
+      }
+
+      /**
+       * スキャン履歴をクリーンアップする関数
+       */
+      function cleanupScanHistory() {
+        const currentTime = Date.now();
+        for (const [data, timestamp] of scanHistory.entries()) {
+          if (currentTime - timestamp > SCAN_COOLDOWN) {
+            scanHistory.delete(data);
+            console.log(`スキャン履歴から "${data}" を削除しました。`);
+          }
+        }
+      }
+
+      // クリーンアップを定期的に実行
+      setInterval(cleanupScanHistory, CLEANUP_INTERVAL);
+
+      // 現在時刻を取得して表示する関数
+      function updateCurrentTime() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const formattedTime = `${hours}:${minutes}:${seconds}`;
+        
+        // 数字部分を<span>で囲んでinnerHTMLに設定
+        document.getElementById('currentTime').innerHTML = `現在時刻: <span class="time">${formattedTime}</span>`;
+      }
+
+      // ページ読み込み時に時刻を表示し、1秒ごとに更新
+      window.onload = function() {
+        updateCurrentTime(); // 初回表示
+        setInterval(updateCurrentTime, 1000); // 1秒ごとに更新
+      };
+      
+      // グローバルスコープで notifyTabClosed 関数を公開
+      window.notifyTabClosed = notifyTabClosed;
+    </script>
+  </div>
+</body>
+</html>
+
+
+
+
+
+
+

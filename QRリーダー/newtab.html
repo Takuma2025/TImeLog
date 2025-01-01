@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>読み取り結果</title>
+  <style>
+    body {
+      background-color: #005CAC;
+      color: #FFFFFF;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      padding: 20px;
+      box-sizing: border-box;
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      font-size: 3em; /* h1のフォントサイズを大きく設定 */
+      font-weight: normal;
+    }
+
+    #info {
+      margin-bottom: 20px;
+      padding: 20px;
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      width: 100%;
+      max-width: 600px;
+      font-weight: normal;
+      word-wrap: break-word;
+      font-size: 2em; /* 生徒コードのフォントサイズを大きく設定 */
+      text-align: center; /* 中央揃え */
+    }
+
+    iframe {
+      width: 0;
+      height: 0;
+      border: none;
+      display: none;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.5em;
+      }
+
+      #info {
+        font-size: 1.5em; /* スマホなどでは少し小さく設定 */
+      }
+
+      iframe {
+        height: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>記録しました</h1>
+  <p id="info"></p>
+
+  <iframe id="linkFrame" style="display: none;"></iframe>
+
+  <script>
+    // URLパラメータから data=... を取得
+    const params = new URLSearchParams(location.search);
+    const data = params.get('data') || "";
+
+    // studentIdを抽出する関数
+    function extractStudentIdFromUrl(url) {
+      try {
+        const urlObj = new URL(url);
+        const studentId = urlObj.searchParams.get('studentId'); // studentIdパラメータを取得
+        return studentId || '生徒コードが見つかりません';
+      } catch (error) {
+        return '無効なURL';
+      }
+    }
+
+    // データがURLならstudentIdを抽出して表示
+    const infoElem = document.getElementById('info');
+    if (/^https?:\/\//.test(data)) {
+      const studentId = extractStudentIdFromUrl(data);
+      infoElem.textContent = `生徒コード: ${studentId}`;
+
+      const linkFrame = document.getElementById('linkFrame');
+      linkFrame.src = data;
+
+      setTimeout(() => {
+        if (window.opener && typeof window.opener.notifyTabClosed === 'function') {
+          window.opener.notifyTabClosed();
+        }
+        window.close();
+      }, 2000);
+    } else {
+      // 単なる文字列ならそのまま表示
+      infoElem.textContent = `読み取ったデータ: ${data}`;
+      setTimeout(() => {
+        if (window.opener && typeof window.opener.notifyTabClosed === 'function') {
+          window.opener.notifyTabClosed();
+        }
+        window.close();
+      }, 2000);
+    }
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
