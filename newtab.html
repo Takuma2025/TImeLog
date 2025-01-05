@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>自習時間記録</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet"> <!-- Font Awesome アイコン用 -->
   <style>
     body {
       background-color: #005CAC;
@@ -45,6 +46,10 @@
       transition: background-color 0.5s ease;
     }
 
+    #status-container i {
+      margin-right: 10px; /* アイコンと文字の間に余白 */
+    }
+
     #studentId {
       font-size: 1.5em;
       margin-top: 20px;
@@ -56,30 +61,30 @@
     }
 
     #studyTime {
-    margin-top: 30px;
-    font-size: 2.5em;
-    color: #ffffff;
-    text-align: center;
-  }
+      margin-top: 30px;
+      font-size: 2.5em;
+      color: #ffffff;
+      text-align: center;
+    }
 
-  #studyTime .label {
-    font-size: 0.6em; /* フォントサイズを小さくする */
-    color: rgb(255, 255, 255); /* 少し薄い白色にする */
-    display: block; /* ブロック表示にする（改行） */
-    margin-bottom: 5px; /* 下に少し余白をつける */
-  }
+    #studyTime .label {
+      font-size: 0.6em;
+      color: rgb(255, 255, 255);
+      display: block;
+      margin-bottom: 5px;
+    }
 
-  #studyTime .value {
-    font-size: 1.5em; /* フォントサイズを大きめに */
-    color: #33ff28; 
-  }
+    #studyTime .value {
+      font-size: 1.5em;
+      color: #33ff28;
+    }
 
-  #experiencePoints {
-    margin-top: 20px;
-    font-size: 2em;
-    color: rgb(60, 245, 255);
-    font-family: 'Arial', sans-serif;
-  }
+    #experiencePoints {
+      margin-top: 20px;
+      font-size: 2em;
+      color: rgb(60, 245, 255);
+      font-family: 'Arial', sans-serif;
+    }
 
     @media (max-width: 600px) {
       h1 {
@@ -136,38 +141,36 @@
     let experiencePoints = 0;
 
     if (scanCount % 2 !== 0) {
-  statusElem.innerHTML = "<strong>開始</strong>";
-  statusContainer.style.backgroundColor = 'green';
+      statusElem.innerHTML = `<i class="fas fa-pencil-alt"></i><strong>開始</strong>`;
+      statusContainer.style.backgroundColor = 'green';
 
-  // 開始時間を生徒ごとに記録
-  const startTime = new Date();
-  localStorage.setItem(startTimeKey, startTime.toISOString());
-} else {
-  statusElem.innerHTML = "<strong>終了</strong>";
-  statusContainer.style.backgroundColor = 'red';
+      // 開始時間を生徒ごとに記録
+      const startTime = new Date();
+      localStorage.setItem(startTimeKey, startTime.toISOString());
+    } else {
+      statusElem.innerHTML = `<i class="fas fa-pencil-alt"></i><strong>終了</strong>`;
+      statusContainer.style.backgroundColor = 'red';
 
-  // 終了時間を現在の時間として設定
-  const endTime = new Date();
-  const startTime = new Date(localStorage.getItem(startTimeKey));
+      // 終了時間を現在の時間として設定
+      const endTime = new Date();
+      const startTime = new Date(localStorage.getItem(startTimeKey));
 
-  // 勉強時間を計算
-  const studyTimeMs = endTime - startTime;
-  const studyTimeSeconds = Math.floor(studyTimeMs / 1000);
-  const studyTimeMinutes = Math.floor(studyTimeSeconds / 60);
-  const remainingMinutes = studyTimeMinutes % 60;
-  const remainingSeconds = studyTimeSeconds % 60;
+      // 勉強時間を計算
+      const studyTimeMs = endTime - startTime;
+      const studyTimeSeconds = Math.floor(studyTimeMs / 1000);
+      const studyTimeMinutes = Math.floor(studyTimeSeconds / 60);
+      const remainingSeconds = studyTimeSeconds % 60;
 
-  // 勉強時間を表示
-  studyTimeElem.innerHTML = `
-    <span class="label">記録した自習時間</span>
-    <span class="value">${studyTimeMinutes}分 ${remainingSeconds}秒</span>
-  `;
+      // 勉強時間を表示
+      studyTimeElem.innerHTML = `
+        <span class="label">記録した自習時間</span>
+        <span class="value">${studyTimeMinutes}分 ${remainingSeconds}秒</span>
+      `;
 
-  // 経験値を表示
-  experiencePoints = studyTimeSeconds; // 秒単位で経験値を計算
-  experiencePointsElem.innerHTML = `▶ 経験値が${experiencePoints} ポイント上がった !`;
-}
-
+      // 経験値を表示
+      experiencePoints = studyTimeSeconds;
+      experiencePointsElem.innerHTML = `▶ 経験値が${experiencePoints} ポイント上がった !`;
+    }
 
     // 生徒IDの表示
     const studentIdElem = document.getElementById('studentId');
@@ -176,7 +179,28 @@
     // Google Apps Scriptへデータ送信
     const encodedStudentId = encodeURIComponent(studentId);
     const scriptUrl = `https://script.google.com/macros/s/AKfycbyBsXC94H_mDDhzbVSmITdoduhPmuk2MEwKrAYZ7HtxlLR1mPaSmXR4ifbUjdEdB8v2/exec?studentId=${encodedStudentId}`;
+// スキャン中フラグ
+let isScanning = false;
 
+if (isScanning) {
+  alert("現在処理中です。少々お待ちください。");
+  throw new Error("スキャン中に再度のスキャンを防止しました。");
+}
+
+isScanning = true;
+
+fetch(scriptUrl)
+  .then(response => response.text())
+  .then(data => {
+    console.log("スプレッドシートに記録されました:", data);
+  })
+  .catch(error => {
+    console.error("エラーが発生しました:", error);
+  })
+  .finally(() => {
+    isScanning = false; // スキャン処理が完了したらリセット
+  });
+  
     fetch(scriptUrl)
       .then(response => response.text())
       .then(data => {
@@ -190,16 +214,16 @@
     localStorage.setItem(scanCountKey, scanCount);
 
     const closeDelay = scanCount % 2 !== 0 ? 3000 : 8000; // 開始時は3秒、終了時は7秒
-setTimeout(() => {
-  if (window.opener && typeof window.opener.notifyTabClosed === 'function') {
-    window.opener.notifyTabClosed();
-  }
-  window.close();
-}, closeDelay);
-
+    setTimeout(() => {
+      if (window.opener && typeof window.opener.notifyTabClosed === 'function') {
+        window.opener.notifyTabClosed();
+      }
+      window.close();
+    }, closeDelay);
   </script>
 </body>
 </html>
+
 
 
 
