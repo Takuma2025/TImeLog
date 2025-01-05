@@ -274,8 +274,8 @@
       const scanHistory = new Map();
       
       // スキャンのクリーンアップ間隔と有効期間
-      const CLEANUP_INTERVAL = 8000; // 8秒ごとにクリーンアップ
-      const SCAN_COOLDOWN = 8000; // 8秒分間のクールダウン
+      const CLEANUP_INTERVAL = 3000; // 3秒ごとにクリーンアップ
+      const SCAN_COOLDOWN = 3000; // 3秒分間のクールダウン
      
       // スキャンの安定性確認用
       let lastScannedData = null;
@@ -359,7 +359,7 @@
                       output.textContent = "";
                       scanningIndicator.style.display = 'block';
                     }
-                  }, 12000); // 8秒後に再スキャンを許可（必要に応じて調整）
+                  }, 8000); // 8秒後に再スキャンを許可（必要に応じて調整）
                 }
               } else {
                 // クールダウン中のスキャンを無視
