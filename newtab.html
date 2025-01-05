@@ -152,7 +152,7 @@
       messageElem.textContent = "自習を開始しました！";
     } else if (scanState === "start") {
       // 終了状態に更新
-      scanState = "end";
+      scanState = "waiting"; // 「waiting」状態を一時的に設定
       localStorage.setItem(scanStateKey, scanState);
 
       statusElem.innerHTML = `<i class="fas fa-pencil-alt"></i><strong>終了</strong>`;
@@ -201,6 +201,10 @@
     // タブを閉じるまでのディレイ
     const closeDelay = scanState === "start" ? 3000 : 8000; // 開始時は3秒、終了時は8秒
     setTimeout(() => {
+      // 「waiting」状態を「end」に戻す
+      if (scanState === "waiting") {
+        localStorage.setItem(scanStateKey, "end");
+      }
       if (window.opener && typeof window.opener.notifyTabClosed === 'function') {
         window.opener.notifyTabClosed();
       }
@@ -209,6 +213,7 @@
   </script>
 </body>
 </html>
+
 
 
 
