@@ -21,14 +21,14 @@
 
     h1 {
       margin-bottom: 20px;
-      font-size: 3em; /* h1のフォントサイズを大きく設定 */
+      font-size: 3em;
       font-weight: normal;
     }
 
     #message {
-      font-size: 2em;  /* メッセージのフォントサイズを少し大きく設定 */
+      font-size: 2em;
       margin-bottom: 10px;
-      font-weight: normal;  /* 太字を解除 */
+      font-weight: normal;
     }
 
     #status-container {
@@ -39,8 +39,8 @@
       max-width: 600px;
       font-weight: normal;
       word-wrap: break-word;
-      font-size: 2em; /* ステータスのフォントサイズを大きく設定 */
-      text-align: center; /* 中央揃え */
+      font-size: 2em;
+      text-align: center;
       background-color: rgba(255, 255, 255, 0.2);
       transition: background-color 0.5s ease;
     }
@@ -55,31 +55,51 @@
       word-wrap: break-word;
     }
 
+    #studyTime {
+    margin-top: 30px;
+    font-size: 2.5em;
+    color: #ffffff;
+    text-align: center;
+  }
+
+  #studyTime .label {
+    font-size: 0.6em; /* フォントサイズを小さくする */
+    color: rgb(255, 255, 255); /* 少し薄い白色にする */
+    display: block; /* ブロック表示にする（改行） */
+    margin-bottom: 5px; /* 下に少し余白をつける */
+  }
+
+  #studyTime .value {
+    font-size: 1.5em; /* フォントサイズを大きめに */
+    color: #33ff28; 
+  }
+
+  #experiencePoints {
+    margin-top: 20px;
+    font-size: 2em;
+    color: rgb(60, 245, 255);
+    font-family: 'Arial', sans-serif;
+  }
+
     @media (max-width: 600px) {
       h1 {
         font-size: 1.5em;
       }
 
-      #status-container, #studentId {
-        font-size: 1.5em; /* スマホなどでは少し小さく設定 */
-      }
-
-      #message {
-        font-size: 1.5em; /* スマホなどでは少し小さく設定 */
+      #status-container, #studentId, #studyTime {
+        font-size: 1.5em;
       }
     }
   </style>
 </head>
 <body>
-  <!-- コンテナの上に表示するメッセージ -->
   <div id="message"></div>
-
-  <!-- 自習時間記録のステータス表示部分 -->
   <div id="status-container">
     <div id="status"></div>
   </div>
-
-  <!-- 生徒IDの表示部分 -->
+  <div id="studyTime"></div>
+  <div id="experiencePoints"></div>
+  <div id="badge"></div>
   <div id="studentId"></div>
 
   <script>
@@ -87,43 +107,76 @@
     const params = new URLSearchParams(location.search);
     const data = params.get('data') || "";
 
-    // スキャン回数をローカルストレージから取得
-    let scanCount = parseInt(localStorage.getItem('scanCount')) || 0;
-
-    // スキャン回数を更新
-    scanCount++;
-
-    // スキャン回数が奇数か偶数かで表示を切り替え
-    const statusElem = document.getElementById('status');
-    const statusContainer = document.getElementById('status-container');
-    const messageElem = document.getElementById('message');  // メッセージを表示する要素を取得
-
-    if (scanCount % 2 !== 0) {
-      statusElem.innerHTML = "<strong>開始</strong>";  // 奇数回目、太字で表示
-      statusContainer.style.backgroundColor = 'green';  // 自習開始は緑
-      messageElem.textContent = "今日もがんばろう！";  // メッセージを表示
-    } else {
-      statusElem.innerHTML = "<strong>終了</strong>";  // 偶数回目、太字で表示
-      statusContainer.style.backgroundColor = 'red';  // 自習終了は赤
-      messageElem.textContent = "おつかれさま！";  // メッセージを表示
-    }
-
     // 生徒IDをURLデータから抽出する関数
     function extractStudentId(data) {
       const match = data.match(/studentId=(\S+)/);
       return match ? match[1] : '生徒コードが見つかりません';
     }
 
-    // QRコードのデータから生徒IDを抽出して表示
+    // QRコードのデータから生徒IDを抽出
     const studentId = extractStudentId(data);
+
+    // スキャン回数と開始時間を生徒ごとに管理
+    const scanCountKey = `scanCount_${studentId}`;
+    const startTimeKey = `startTime_${studentId}`;
+
+    // 生徒ごとのスキャン回数を取得
+    let scanCount = parseInt(localStorage.getItem(scanCountKey)) || 0;
+
+    // スキャン回数を更新
+    scanCount++;
+
+    // ステータスの更新
+    const statusElem = document.getElementById('status');
+    const statusContainer = document.getElementById('status-container');
+    const messageElem = document.getElementById('message');
+    const studyTimeElem = document.getElementById('studyTime');
+    const experiencePointsElem = document.getElementById('experiencePoints');
+
+    let experiencePoints = 0;
+
+    if (scanCount % 2 !== 0) {
+  statusElem.innerHTML = "<strong>開始</strong>";
+  statusContainer.style.backgroundColor = 'green';
+
+  // 開始時間を生徒ごとに記録
+  const startTime = new Date();
+  localStorage.setItem(startTimeKey, startTime.toISOString());
+} else {
+  statusElem.innerHTML = "<strong>終了</strong>";
+  statusContainer.style.backgroundColor = 'red';
+
+  // 終了時間を現在の時間として設定
+  const endTime = new Date();
+  const startTime = new Date(localStorage.getItem(startTimeKey));
+
+  // 勉強時間を計算
+  const studyTimeMs = endTime - startTime;
+  const studyTimeSeconds = Math.floor(studyTimeMs / 1000);
+  const studyTimeMinutes = Math.floor(studyTimeSeconds / 60);
+  const remainingMinutes = studyTimeMinutes % 60;
+  const remainingSeconds = studyTimeSeconds % 60;
+
+  // 勉強時間を表示
+  studyTimeElem.innerHTML = `
+    <span class="label">記録した自習時間</span>
+    <span class="value">${studyTimeMinutes}分 ${remainingSeconds}秒</span>
+  `;
+
+  // 経験値を表示
+  experiencePoints = studyTimeSeconds; // 秒単位で経験値を計算
+  experiencePointsElem.innerHTML = `▶ 経験値が${experiencePoints} ポイント上がった !`;
+}
+
+
+    // 生徒IDの表示
     const studentIdElem = document.getElementById('studentId');
     studentIdElem.textContent = `生徒コード: ${studentId}`;
 
-    // QRコードのデータ（studentId）をGoogle Apps Scriptに送信
+    // Google Apps Scriptへデータ送信
     const encodedStudentId = encodeURIComponent(studentId);
-    const scriptUrl = `https://script.google.com/macros/s/AKfycbwtddx4r-dHvX4e9y3IcSFToJLtKgoD_qWv8y7OoJYguGQSYXOxhcuFnMoKENw2wfQv/exec?studentId=${encodedStudentId}`;
+    const scriptUrl = `https://script.google.com/macros/s/AKfycbyBsXC94H_mDDhzbVSmITdoduhPmuk2MEwKrAYZ7HtxlLR1mPaSmXR4ifbUjdEdB8v2/exec?studentId=${encodedStudentId}`;
 
-    // fetch APIを使ってGoogle Apps Scriptにデータを送信
     fetch(scriptUrl)
       .then(response => response.text())
       .then(data => {
@@ -133,19 +186,26 @@
         console.error("エラーが発生しました:", error);
       });
 
-    // スキャン回数をローカルストレージに保存
-    localStorage.setItem('scanCount', scanCount);
+    // スキャン回数を生徒ごとに保存
+    localStorage.setItem(scanCountKey, scanCount);
 
-    // 2秒後に親ウィンドウへ通知し、タブを閉じる
-    setTimeout(() => {
-      if (window.opener && typeof window.opener.notifyTabClosed === 'function') {
-        window.opener.notifyTabClosed();
-      }
-      window.close();
-    }, 4000);
+    const closeDelay = scanCount % 2 !== 0 ? 3000 : 8000; // 開始時は3秒、終了時は7秒
+setTimeout(() => {
+  if (window.opener && typeof window.opener.notifyTabClosed === 'function') {
+    window.opener.notifyTabClosed();
+  }
+  window.close();
+}, closeDelay);
+
   </script>
 </body>
 </html>
+
+
+
+
+
+
 
 
 

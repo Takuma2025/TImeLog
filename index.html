@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <title>QRコード読み取り</title>
+  <!-- Font Awesome CDN追加 -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
   <style>
     /* 基本設定 */
     body {
@@ -49,19 +52,13 @@
       margin-bottom: 20px;
     }
 
-    /* 「TOPΣ」を強調するスタイル */
-    .highlight {
-      font-family: 'Century', 'Times New Roman', Times, serif;
-      font-weight: bold;
-    }
-
     /* ボタンのスタイル */
     .link-button {
       display: inline-block;
-      background-color: #ffffff;
-      color: #005CAC;
+      background-color: #ff7300;
+      color: #ffffff;
       padding: 15px 30px;
-      font-size: 1.2em;
+      font-size: 24px;
       text-decoration: none;
       border-radius: 8px;
       margin-top: 30px;
@@ -95,14 +92,15 @@
     /* 現在時刻のスタイル */
     #currentTime {
       margin-top: 20px;
+      margin-bottom: 20px;
       font-size: 1.2em;
       color: #FFFFFF; /* 白色 */
     }
 
-    /* 現在時刻の数字部分のスタイル */
-    #currentTime .time {
-      font-size: 2em; /* フォントサイズを大きく設定 */
-      font-family: Arial, sans-serif; /* Arialフォントを適用 */ /* ここを変更 */
+    /* 時計アイコンのスタイル */
+    #currentTime i {
+      margin-right: 10px;
+      font-size: 2em; /* アイコンのサイズ */
     }
 
     /* アニメーション定義 */
@@ -126,25 +124,22 @@
     /* 動く横線のスタイル */
     .scan-line {
       position: absolute;
-      top: 50%; /* 画面の垂直方向中央に配置 */
+      top: -4px; /* 初期位置は画面の上に設定 */
       left: 50%; /* 横線を中央揃えにする */
       width: 86%; /* 横線の幅を80%に設定（少し短くする） */
-      height: 5px;
+      height: 4px;
       background-color: rgba(255, 255, 255, 0.8);
       animation: scanLineAnimation 4s infinite linear; /* 4秒に変更 */
-      transform: translateX(-50%) translateY(-50%); /* 中央揃え */
+      transform: translateX(-50%); /* 中央揃え */
     }
 
-    /* 横線のアニメーション（上下に動く） */
+    /* 横線のアニメーション（上から下に進む） */
     @keyframes scanLineAnimation {
       0% {
-        top: 0;
-      }
-      50% {
-        top: 98%;
+        top: -4px; /* 上から始まる */
       }
       100% {
-        top: 0;
+        top: 97%; /* 下に到達 */
       }
     }
 
@@ -172,9 +167,8 @@
       }
 
       /* 現在時刻の数字部分のスタイル（レスポンシブ対応） */
-      #currentTime .time {
+      #currentTime i {
         font-size: 1.5em; /* 小さい画面では少し小さく */
-        font-family: Arial, sans-serif; /* Arialフォントを適用 */ /* ここも変更 */
       }
     }
 
@@ -205,11 +199,32 @@
 
     <h1>自習時間記録システム</h1>
 
-    <!-- 現在時刻を表示する要素（位置を変更） -->
-    <div id="currentTime"></div>
+    <!-- 現在時刻を表示する要素（時計アイコンと時間） -->
+<div id="currentTime">
+  <i class="fas fa-clock"></i>
+  <span class="time">00:00:00</span> <!-- 時刻はJavaScriptで動的に変更されます -->
+</div>
 
-    <!-- QRコード読み取りカメラの見出し（位置を変更） -->
-    <h2>▼QRコード読み取りカメラ▼</h2>
+<style>
+  /* 現在時刻のスタイル */
+  #currentTime {
+    margin-top: 20px;
+    font-size: 1.2em;
+    color: #FFFFFF; /* 白色 */
+  }
+
+  /* 時計アイコンのスタイル */
+  #currentTime i {
+    margin-right: 10px;
+    font-size: 2em; /* アイコンのサイズ */
+  }
+
+  /* 現在時刻の数字部分のスタイル */
+  #currentTime .time {
+    font-size: 2em; /* 文字を大きく */
+    font-family: Arial, sans-serif;
+  }
+</style>
 
     <!-- カメラ映像 -->
     <div id="video-container" style="position: relative;">
@@ -223,16 +238,13 @@
 
     <!-- スキャン結果とインジケーターをラップする親要素 -->
     <div class="scan-status">
-      <!-- 結果を表示しない -->
       <div id="output" style="display: none;"></div>
-
-      <!-- スキャン中のインジケーター -->
       <div id="scanningIndicator">QRコードをスキャンしています...</div>
     </div>
 
     <!-- リンクボタン -->
     <a href="https://docs.google.com/spreadsheets/d/1_M5ibTnC6_8KIAPUswae9bgFcEEYMFi7zgGLXHmhzl0/edit?gid=2029476429#gid=2029476429" class="link-button" target="_blank">
-      自習時間ランキングを見る
+      <b>自習時間の記録</b>を見る
     </a>
 
     <!-- ライブラリ & スクリプト -->
@@ -312,50 +324,50 @@
                 scanCount += 1;
                 console.log(`同じQRコード "${code.data}" が連続して検出されました (${scanCount}回目)`);
               } else {
-                lastScannedData = code.data;
-                scanCount = 1;
-                console.log(`新しいQRコード "${code.data}" が検出されました`);
-              }
-      
-              if (scanCount >= scanThreshold && !isHandlingScan && (resultTab === null || resultTab.closed)) {
-                // スキャン処理中に設定（即座にフラグを設定）  
-                isHandlingScan = true;
-                scanHistory.set(code.data, currentTime); // スキャン時刻を更新
-                output.textContent = ''; // 結果を消去
-                scanningIndicator.style.display = 'none';
-
-                // ビープ音を鳴らす
-                playBeepSound();
-
-                // 別タブを開く。「newtab.html?data=◯◯」にクエリパラメータを渡す
-                const newTabUrl = `newtab.html?data=${encodeURIComponent(code.data)}`;
-                resultTab = window.open(newTabUrl, "resultTab"); // 名前付きウィンドウを使用
-          
-                if (resultTab) {
-                  // タブが正常に開かれた場合
-                  console.log("新しいタブを開きました:", newTabUrl);
-                } else {
-                  // ポップアップブロックなどでタブが開けなかった場合
-                  console.error("タブを開けませんでした。ポップアップブロックが有効か確認してください。");
-                  isHandlingScan = false;
-                  scanningIndicator.style.display = 'block';
-                  output.textContent = "タブを開けませんでした。ポップアップブロックを確認してください。";
+                  lastScannedData = code.data;
+                  scanCount = 1;
+                  console.log(`新しいQRコード "${code.data}" が検出されました`);
                 }
+      
+                if (scanCount >= scanThreshold && !isHandlingScan && (resultTab === null || resultTab.closed)) {
+                  // スキャン処理中に設定（即座にフラグを設定）  
+                  isHandlingScan = true;
+                  scanHistory.set(code.data, currentTime); // スキャン時刻を更新
+                  output.textContent = ''; // 結果を消去
+                  scanningIndicator.style.display = 'none';
+
+                  // ビープ音を鳴らす
+                  playBeepSound();
+
+                  // 別タブを開く。「newtab.html?data=◯◯」にクエリパラメータを渡す
+                  const newTabUrl = `newtab.html?data=${encodeURIComponent(code.data)}`;
+                  resultTab = window.open(newTabUrl, "resultTab"); // 名前付きウィンドウを使用
           
-                // スキャン処理をリセットするタイマーを設定（念のため）  
-                setTimeout(() => {
-                  // フラグがリセットされていない場合は強制的にリセット
-                  if (isHandlingScan) {
+                  if (resultTab) {
+                    // タブが正常に開かれた場合
+                    console.log("新しいタブを開きました:", newTabUrl);
+                  } else {
+                    // ポップアップブロックなどでタブが開けなかった場合
+                    console.error("タブを開けませんでした。ポップアップブロックが有効か確認してください。");
                     isHandlingScan = false;
-                    output.textContent = "";
                     scanningIndicator.style.display = 'block';
+                    output.textContent = "タブを開けませんでした。ポップアップブロックを確認してください。";
                   }
-                }, 5000); // 5秒後に再スキャンを許可（必要に応じて調整）
+          
+                  // スキャン処理をリセットするタイマーを設定（念のため）  
+                  setTimeout(() => {
+                    // フラグがリセットされていない場合は強制的にリセット
+                    if (isHandlingScan) {
+                      isHandlingScan = false;
+                      output.textContent = "";
+                      scanningIndicator.style.display = 'block';
+                    }
+                  }, 5000); // 5秒後に再スキャンを許可（必要に応じて調整）
+                }
+              } else {
+                // クールダウン中のスキャンを無視
+                console.log(`QRコード "${code.data}" はクールダウン中のためスキャンを無視しました。`);
               }
-            } else {
-              // クールダウン中のスキャンを無視
-              console.log(`QRコード "${code.data}" はクールダウン中のためスキャンを無視しました。`);
-            }
           } else {
             // QRコードが検出されていない場合はリセット
             lastScannedData = null;
@@ -392,7 +404,7 @@
         const formattedTime = `${hours}:${minutes}:${seconds}`;
         
         // 数字部分を<span>で囲んでinnerHTMLに設定
-        document.getElementById('currentTime').innerHTML = `現在時刻: <span class="time">${formattedTime}</span>`;
+        document.getElementById('currentTime').innerHTML = `<i class="fas fa-clock"></i> <span class="time">${formattedTime}</span>`;
       }
 
       // ページ読み込み時に時刻を表示し、1秒ごとに更新
@@ -400,7 +412,7 @@
         updateCurrentTime(); // 初回表示
         setInterval(updateCurrentTime, 1000); // 1秒ごとに更新
       };
-      
+
       // グローバルスコープで notifyTabClosed 関数を公開
       window.notifyTabClosed = notifyTabClosed;
     </script>
