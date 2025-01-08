@@ -108,19 +108,6 @@
   <div id="studentId"></div>
 
   <script>
-    // ---【 連続スキャン防止のための設定 】---
-    const lastScanKey = 'lastScanTime'; // 最後にスキャンした時刻を保存するキー
-    const blockInterval = 5000;         // 連続スキャンをブロックする閾値(ミリ秒) 例:5秒
-    const now = Date.now();
-    const lastScanTime = parseInt(localStorage.getItem(lastScanKey)) || 0;
-
-    if (now - lastScanTime < blockInterval) {
-      alert("連続スキャンを防止しました。しばらくお待ちください。");
-      window.close();
-    }
-    // 今回スキャンした時刻を記録
-    localStorage.setItem(lastScanKey, now);
-
     // URLパラメータからQRコードのデータを取得
     const params = new URLSearchParams(location.search);
     const data = params.get('data') || "";
@@ -133,16 +120,6 @@
 
     // QRコードのデータから生徒IDを抽出
     const studentId = extractStudentId(data);
-
-    // ---【 前回のアクション(開始 or 終了)を記録するキー 】---
-    const lastActionKey = `lastAction_${studentId}`;
-
-    // もし「前回のアクション」が 'end' だった場合は、タブを再度開いても何もしないで閉じる
-    if (localStorage.getItem(lastActionKey) === 'end') {
-      // 必要に応じてメッセージ等を表示
-      console.log("このタブは既に終了処理済みです。再読み込みを阻止します。");
-      window.close();
-    }
 
     // スキャン回数と開始時間を生徒ごとに管理
     const scanCountKey = `scanCount_${studentId}`;
@@ -164,19 +141,13 @@
     let experiencePoints = 0;
 
     if (scanCount % 2 !== 0) {
-      // 開始
       statusElem.innerHTML = `<i class="fas fa-pencil-alt"></i><strong>開始</strong>`;
       statusContainer.style.backgroundColor = 'green';
 
       // 開始時間を生徒ごとに記録
       const startTime = new Date();
       localStorage.setItem(startTimeKey, startTime.toISOString());
-
-      // 「開始」アクションを記録
-      localStorage.setItem(lastActionKey, 'start');
-
     } else {
-      // 終了
       statusElem.innerHTML = `<i class="fas fa-pencil-alt"></i><strong>終了</strong>`;
       statusContainer.style.backgroundColor = 'red';
 
@@ -199,9 +170,6 @@
       // 経験値を表示
       experiencePoints = studyTimeSeconds;
       experiencePointsElem.innerHTML = `▶ 経験値が${experiencePoints} ポイント上がった !`;
-
-      // 「終了」アクションを記録
-      localStorage.setItem(lastActionKey, 'end');
     }
 
     // 生徒IDの表示
@@ -211,33 +179,32 @@
     // Google Apps Scriptへデータ送信
     const encodedStudentId = encodeURIComponent(studentId);
     const scriptUrl = `https://script.google.com/macros/s/AKfycbzhBvWFMzU1Gz9Q1RDD7MnYTbJCuWHXU8YAeTHvTiGvs8sF4eEAZVDc79l61UjIJ3Bn/exec?studentId=${encodedStudentId}`;
+// スキャン中フラグ
+let isScanning = false;
 
-    // スキャン中フラグ
-    let isScanning = false;
+if (isScanning) {
+  alert("現在処理中です。少々お待ちください。");
+  throw new Error("スキャン中に再度のスキャンを防止しました。");
+}
 
-    if (isScanning) {
-      alert("現在処理中です。少々お待ちください。");
-      throw new Error("スキャン中に再度のスキャンを防止しました。");
-    }
+isScanning = true;
 
-    isScanning = true;
-
-    fetch(scriptUrl)
-      .then(response => response.text())
-      .then(data => {
-        console.log("スプレッドシートに記録されました:", data);
-      })
-      .catch(error => {
-        console.error("エラーが発生しました:", error);
-      })
-      .finally(() => {
-        isScanning = false; // スキャン処理が完了したらリセット
-      });
+fetch(scriptUrl)
+  .then(response => response.text())
+  .then(data => {
+    console.log("スプレッドシートに記録されました:", data);
+  })
+  .catch(error => {
+    console.error("エラーが発生しました:", error);
+  })
+  .finally(() => {
+    isScanning = false; // スキャン処理が完了したらリセット
+  });
 
     // スキャン回数を生徒ごとに保存
     localStorage.setItem(scanCountKey, scanCount);
 
-    const closeDelay = scanCount % 2 !== 0 ? 3000 : 4000; // 開始時は3秒、終了時は4秒
+    const closeDelay = scanCount % 2 !== 0 ? 3000 : 3000; // 開始時は3秒、終了時は3秒
     setTimeout(() => {
       if (window.opener && typeof window.opener.notifyTabClosed === 'function') {
         window.opener.notifyTabClosed();
@@ -247,7 +214,6 @@
   </script>
 </body>
 </html>
-
 
 
 
