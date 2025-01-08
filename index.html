@@ -240,7 +240,7 @@
     </div>
 
     <!-- リンクボタン -->
-    <a href="https://docs.google.com/spreadsheets/d/1_M5ibTnC6_8KIAPUswae9bgFcEEYMFi7zgGLXHmhzl0/edit?gid=2029476429#gid=2029476429" class="link-button" target="_blank">
+    <a href="https://docs.google.com/spreadsheets/d/1O2FIUI1IFDNs9SvpLqu8sL1etQ8rF7f21X6H2Jmb7f8/edit?gid=2029476429#gid=2029476429" class="link-button" target="_blank">
       <b>自習時間の記録</b>を見る
     </a>
 
@@ -274,8 +274,8 @@
       const scanHistory = new Map();
       
       // スキャンのクリーンアップ間隔と有効期間
-      const CLEANUP_INTERVAL = 3000; // 3秒ごとにクリーンアップ
-      const SCAN_COOLDOWN = 15000; // 3秒分間のクールダウン
+      const CLEANUP_INTERVAL = 8000; // 8秒ごとにクリーンアップ
+      const SCAN_COOLDOWN = 8000; // 8秒分間のクールダウン
      
       // スキャンの安定性確認用
       let lastScannedData = null;
@@ -359,7 +359,7 @@
                       output.textContent = "";
                       scanningIndicator.style.display = 'block';
                     }
-                  }, 8000); // 8秒後に再スキャンを許可（必要に応じて調整）
+                  }, 5000); // 5秒後に再スキャンを許可（必要に応じて調整）
                 }
               } else {
                 // クールダウン中のスキャンを無視
