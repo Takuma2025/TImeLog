@@ -237,7 +237,7 @@
     // スキャン回数を生徒ごとに保存
     localStorage.setItem(scanCountKey, scanCount);
 
-    const closeDelay = scanCount % 2 !== 0 ? 3000 : 8000; // 開始時は3秒、終了時は8秒
+    const closeDelay = scanCount % 2 !== 0 ? 3000 : 4000; // 開始時は3秒、終了時は4秒
     setTimeout(() => {
       if (window.opener && typeof window.opener.notifyTabClosed === 'function') {
         window.opener.notifyTabClosed();
