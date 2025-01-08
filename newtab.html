@@ -108,6 +108,22 @@
   <div id="studentId"></div>
 
   <script>
+    // ---【 連続スキャン防止のための設定 】---
+    const lastScanKey = 'lastScanTime';  // 最後にスキャンした時刻を保存するキー
+    const blockInterval = 5000;          // 連続スキャンをブロックする閾値(ミリ秒) 例:5秒
+
+    const now = Date.now();
+    const lastScanTime = parseInt(localStorage.getItem(lastScanKey)) || 0;
+
+    // もし「最後のスキャン時刻+blockInterval」が現在時刻より後であれば連続スキャンとみなしてタブを閉じる
+    if (now - lastScanTime < blockInterval) {
+      alert("連続スキャンを防止しました。しばらくお待ちください。");
+      window.close();
+    }
+
+    // 今回スキャンした時刻を記録
+    localStorage.setItem(lastScanKey, now);
+
     // URLパラメータからQRコードのデータを取得
     const params = new URLSearchParams(location.search);
     const data = params.get('data') || "";
@@ -179,27 +195,28 @@
     // Google Apps Scriptへデータ送信
     const encodedStudentId = encodeURIComponent(studentId);
     const scriptUrl = `https://script.google.com/macros/s/AKfycbzhBvWFMzU1Gz9Q1RDD7MnYTbJCuWHXU8YAeTHvTiGvs8sF4eEAZVDc79l61UjIJ3Bn/exec?studentId=${encodedStudentId}`;
-// スキャン中フラグ
-let isScanning = false;
 
-if (isScanning) {
-  alert("現在処理中です。少々お待ちください。");
-  throw new Error("スキャン中に再度のスキャンを防止しました。");
-}
+    // スキャン中フラグ
+    let isScanning = false;
 
-isScanning = true;
+    if (isScanning) {
+      alert("現在処理中です。少々お待ちください。");
+      throw new Error("スキャン中に再度のスキャンを防止しました。");
+    }
 
-fetch(scriptUrl)
-  .then(response => response.text())
-  .then(data => {
-    console.log("スプレッドシートに記録されました:", data);
-  })
-  .catch(error => {
-    console.error("エラーが発生しました:", error);
-  })
-  .finally(() => {
-    isScanning = false; // スキャン処理が完了したらリセット
-  });
+    isScanning = true;
+
+    fetch(scriptUrl)
+      .then(response => response.text())
+      .then(data => {
+        console.log("スプレッドシートに記録されました:", data);
+      })
+      .catch(error => {
+        console.error("エラーが発生しました:", error);
+      })
+      .finally(() => {
+        isScanning = false; // スキャン処理が完了したらリセット
+      });
 
     // スキャン回数を生徒ごとに保存
     localStorage.setItem(scanCountKey, scanCount);
@@ -214,6 +231,7 @@ fetch(scriptUrl)
   </script>
 </body>
 </html>
+
 
 
 
