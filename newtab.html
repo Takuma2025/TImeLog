@@ -86,6 +86,12 @@
       font-family: 'Arial', sans-serif;
     }
 
+    #libraryCardPoints {
+      margin-top: 10px;
+      font-size: 1.8em;
+      color: #eeff00;
+    }
+
     @media (max-width: 600px) {
       h1 {
         font-size: 1.5em;
@@ -104,6 +110,7 @@
   </div>
   <div id="studyTime"></div>
   <div id="experiencePoints"></div>
+  <div id="libraryCardPoints"></div> <!-- 図書カードポイント表示エリアを追加 -->
   <div id="badge"></div>
   <div id="studentId"></div>
 
@@ -170,6 +177,11 @@
       // 経験値を表示
       experiencePoints = studyTimeSeconds;
       experiencePointsElem.innerHTML = `▶ 経験値が${experiencePoints} ポイント上がった !`;
+
+      // 図書カードポイントを計算
+      const libraryCardPoints = Math.floor(experiencePoints * 0.1); // 勉強時間秒数の1%をポイントに変換
+      const libraryCardPointsElem = document.getElementById('libraryCardPoints');
+      libraryCardPointsElem.innerHTML = `▶ 💰図書カードポイントが${libraryCardPoints} P貯まった！`;
     }
 
     // 生徒IDの表示
@@ -179,32 +191,31 @@
     // Google Apps Scriptへデータ送信
     const encodedStudentId = encodeURIComponent(studentId);
     const scriptUrl = `https://script.google.com/macros/s/AKfycbzhBvWFMzU1Gz9Q1RDD7MnYTbJCuWHXU8YAeTHvTiGvs8sF4eEAZVDc79l61UjIJ3Bn/exec?studentId=${encodedStudentId}`;
-// スキャン中フラグ
-let isScanning = false;
+    let isScanning = false;
 
-if (isScanning) {
-  alert("現在処理中です。少々お待ちください。");
-  throw new Error("スキャン中に再度のスキャンを防止しました。");
-}
+    if (isScanning) {
+      alert("現在処理中です。少々お待ちください。");
+      throw new Error("スキャン中に再度のスキャンを防止しました。");
+    }
 
-isScanning = true;
+    isScanning = true;
 
-fetch(scriptUrl)
-  .then(response => response.text())
-  .then(data => {
-    console.log("スプレッドシートに記録されました:", data);
-  })
-  .catch(error => {
-    console.error("エラーが発生しました:", error);
-  })
-  .finally(() => {
-    isScanning = false; // スキャン処理が完了したらリセット
-  });
+    fetch(scriptUrl)
+      .then(response => response.text())
+      .then(data => {
+        console.log("スプレッドシートに記録されました:", data);
+      })
+      .catch(error => {
+        console.error("エラーが発生しました:", error);
+      })
+      .finally(() => {
+        isScanning = false; // スキャン処理が完了したらリセット
+      });
 
     // スキャン回数を生徒ごとに保存
     localStorage.setItem(scanCountKey, scanCount);
 
-    const closeDelay = scanCount % 2 !== 0 ? 3000 : 3000; // 開始時は3秒、終了時は3秒
+    const closeDelay = scanCount % 2 !== 0 ? 3000 : 5000; // 開始時は3秒、終了時は5秒
     setTimeout(() => {
       if (window.opener && typeof window.opener.notifyTabClosed === 'function') {
         window.opener.notifyTabClosed();
@@ -214,6 +225,7 @@ fetch(scriptUrl)
   </script>
 </body>
 </html>
+
 
 
 
