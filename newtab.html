@@ -109,18 +109,15 @@
 
   <script>
     // ---【 連続スキャン防止のための設定 】---
-    const lastScanKey = 'lastScanTime';  // 最後にスキャンした時刻を保存するキー
-    const blockInterval = 5000;          // 連続スキャンをブロックする閾値(ミリ秒) 例:5秒
-
+    const lastScanKey = 'lastScanTime'; // 最後にスキャンした時刻を保存するキー
+    const blockInterval = 5000;         // 連続スキャンをブロックする閾値(ミリ秒) 例:5秒
     const now = Date.now();
     const lastScanTime = parseInt(localStorage.getItem(lastScanKey)) || 0;
 
-    // もし「最後のスキャン時刻+blockInterval」が現在時刻より後であれば連続スキャンとみなしてタブを閉じる
     if (now - lastScanTime < blockInterval) {
       alert("連続スキャンを防止しました。しばらくお待ちください。");
       window.close();
     }
-
     // 今回スキャンした時刻を記録
     localStorage.setItem(lastScanKey, now);
 
@@ -136,6 +133,16 @@
 
     // QRコードのデータから生徒IDを抽出
     const studentId = extractStudentId(data);
+
+    // ---【 前回のアクション(開始 or 終了)を記録するキー 】---
+    const lastActionKey = `lastAction_${studentId}`;
+
+    // もし「前回のアクション」が 'end' だった場合は、タブを再度開いても何もしないで閉じる
+    if (localStorage.getItem(lastActionKey) === 'end') {
+      // 必要に応じてメッセージ等を表示
+      console.log("このタブは既に終了処理済みです。再読み込みを阻止します。");
+      window.close();
+    }
 
     // スキャン回数と開始時間を生徒ごとに管理
     const scanCountKey = `scanCount_${studentId}`;
@@ -157,13 +164,19 @@
     let experiencePoints = 0;
 
     if (scanCount % 2 !== 0) {
+      // 開始
       statusElem.innerHTML = `<i class="fas fa-pencil-alt"></i><strong>開始</strong>`;
       statusContainer.style.backgroundColor = 'green';
 
       // 開始時間を生徒ごとに記録
       const startTime = new Date();
       localStorage.setItem(startTimeKey, startTime.toISOString());
+
+      // 「開始」アクションを記録
+      localStorage.setItem(lastActionKey, 'start');
+
     } else {
+      // 終了
       statusElem.innerHTML = `<i class="fas fa-pencil-alt"></i><strong>終了</strong>`;
       statusContainer.style.backgroundColor = 'red';
 
@@ -186,6 +199,9 @@
       // 経験値を表示
       experiencePoints = studyTimeSeconds;
       experiencePointsElem.innerHTML = `▶ 経験値が${experiencePoints} ポイント上がった !`;
+
+      // 「終了」アクションを記録
+      localStorage.setItem(lastActionKey, 'end');
     }
 
     // 生徒IDの表示
@@ -221,7 +237,7 @@
     // スキャン回数を生徒ごとに保存
     localStorage.setItem(scanCountKey, scanCount);
 
-    const closeDelay = scanCount % 2 !== 0 ? 3000 : 8000; // 開始時は3秒、終了時は7秒
+    const closeDelay = scanCount % 2 !== 0 ? 3000 : 8000; // 開始時は3秒、終了時は8秒
     setTimeout(() => {
       if (window.opener && typeof window.opener.notifyTabClosed === 'function') {
         window.opener.notifyTabClosed();
