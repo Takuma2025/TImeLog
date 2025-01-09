@@ -92,6 +92,17 @@
       color: #eeff00;
     }
 
+    #pointImage {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 500px;
+      height: auto;
+      z-index: 1000;
+    }
+
     @media (max-width: 600px) {
       h1 {
         font-size: 1.5em;
@@ -113,6 +124,9 @@
   <div id="libraryCardPoints"></div> <!-- 図書カードポイント表示エリアを追加 -->
   <div id="badge"></div>
   <div id="studentId"></div>
+
+  <!-- 画像要素を追加 -->
+  <img id="pointImage" src="point.png" alt="ポイント画像">
 
   <script>
     // URLパラメータからQRコードのデータを取得
@@ -176,12 +190,16 @@
 
       // 経験値を表示
       experiencePoints = studyTimeSeconds;
-      experiencePointsElem.innerHTML = `▶ 経験値が${experiencePoints} ポイント上がった !`;
+      experiencePointsElem.innerHTML = `▶ 経験値ポイントが ${experiencePoints} EP上がった !`;
 
       // 図書カードポイントを計算
       const libraryCardPoints = Math.floor(experiencePoints * 0.1); // 勉強時間秒数の1%をポイントに変換
       const libraryCardPointsElem = document.getElementById('libraryCardPoints');
-      libraryCardPointsElem.innerHTML = `▶ 💰図書カードポイントが${libraryCardPoints} P貯まった！`;
+      libraryCardPointsElem.innerHTML = `▶ 図書カードポイントが ${libraryCardPoints} BP貯まった !`;
+
+      // 画像を表示
+      const pointImage = document.getElementById('pointImage');
+      pointImage.style.display = 'block'; // 画像を表示
     }
 
     // 生徒IDの表示
@@ -225,6 +243,7 @@
   </script>
 </body>
 </html>
+
 
 
 
