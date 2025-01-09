@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>自習時間記録</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet"> <!-- Font Awesome アイコン用 -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
   <style>
     body {
       background-color: #005CAC;
@@ -44,10 +44,25 @@
       text-align: center;
       background-color: rgba(255, 255, 255, 0.2);
       transition: background-color 0.5s ease;
+      position: relative;
     }
 
     #status-container i {
-      margin-right: 10px; /* アイコンと文字の間に余白 */
+      margin-right: 10px;
+    }
+
+    #statusImage {
+      margin-top: 20px;
+      width: 300px;
+      height: auto;
+      display: none;
+    }
+
+    #reminder {
+      margin-top: 10px;
+      font-size: 2em;
+      color: #FFFFFF;
+      display: none;
     }
 
     #studentId {
@@ -119,94 +134,83 @@
   <div id="status-container">
     <div id="status"></div>
   </div>
+  <img id="statusImage" src="list.png" alt="開始画像">
+  <div id="reminder">自習を開始する前に、手帳を見て何をするか確認しよう。<br>まだ書いていない人は、何をするか書き出そう。</div>
   <div id="studyTime"></div>
   <div id="experiencePoints"></div>
-  <div id="libraryCardPoints"></div> <!-- 図書カードポイント表示エリアを追加 -->
+  <div id="libraryCardPoints"></div>
   <div id="badge"></div>
   <div id="studentId"></div>
 
-  <!-- 画像要素を追加 -->
   <img id="pointImage" src="point.png" alt="ポイント画像">
 
   <script>
-    // URLパラメータからQRコードのデータを取得
     const params = new URLSearchParams(location.search);
     const data = params.get('data') || "";
 
-    // 生徒IDをURLデータから抽出する関数
     function extractStudentId(data) {
       const match = data.match(/studentId=(\S+)/);
       return match ? match[1] : '生徒コードが見つかりません';
     }
 
-    // QRコードのデータから生徒IDを抽出
     const studentId = extractStudentId(data);
-
-    // スキャン回数と開始時間を生徒ごとに管理
     const scanCountKey = `scanCount_${studentId}`;
     const startTimeKey = `startTime_${studentId}`;
 
-    // 生徒ごとのスキャン回数を取得
     let scanCount = parseInt(localStorage.getItem(scanCountKey)) || 0;
-
-    // スキャン回数を更新
     scanCount++;
 
-    // ステータスの更新
     const statusElem = document.getElementById('status');
     const statusContainer = document.getElementById('status-container');
     const messageElem = document.getElementById('message');
     const studyTimeElem = document.getElementById('studyTime');
     const experiencePointsElem = document.getElementById('experiencePoints');
+    const statusImage = document.getElementById('statusImage');
+    const reminderElem = document.getElementById('reminder');
 
     let experiencePoints = 0;
 
     if (scanCount % 2 !== 0) {
       statusElem.innerHTML = `<i class="fas fa-pencil-alt"></i><strong>開始</strong>`;
       statusContainer.style.backgroundColor = 'green';
+      statusImage.style.display = 'block';
+      reminderElem.style.display = 'block';
 
-      // 開始時間を生徒ごとに記録
       const startTime = new Date();
       localStorage.setItem(startTimeKey, startTime.toISOString());
     } else {
       statusElem.innerHTML = `<i class="fas fa-pencil-alt"></i><strong>終了</strong>`;
       statusContainer.style.backgroundColor = 'red';
+      statusImage.style.display = 'none';
+      reminderElem.style.display = 'none';
 
-      // 終了時間を現在の時間として設定
       const endTime = new Date();
       const startTime = new Date(localStorage.getItem(startTimeKey));
 
-      // 勉強時間を計算
       const studyTimeMs = endTime - startTime;
       const studyTimeSeconds = Math.floor(studyTimeMs / 1000);
       const studyTimeMinutes = Math.floor(studyTimeSeconds / 60);
       const remainingSeconds = studyTimeSeconds % 60;
 
-      // 勉強時間を表示
       studyTimeElem.innerHTML = `
         <span class="label">記録した自習時間</span>
         <span class="value">${studyTimeMinutes}分 ${remainingSeconds}秒</span>
       `;
 
-      // 経験値を表示
       experiencePoints = studyTimeSeconds;
       experiencePointsElem.innerHTML = `▶ 経験値ポイントが ${experiencePoints} EP上がった !`;
 
-      // 図書カードポイントを計算
-      const libraryCardPoints = Math.floor(experiencePoints * 0.1); // 勉強時間秒数の1%をポイントに変換
+      const libraryCardPoints = Math.floor(experiencePoints * 0.1);
       const libraryCardPointsElem = document.getElementById('libraryCardPoints');
       libraryCardPointsElem.innerHTML = `▶ 図書カードポイントが ${libraryCardPoints} BP貯まった !`;
 
-      // 画像を表示
       const pointImage = document.getElementById('pointImage');
-      pointImage.style.display = 'block'; // 画像を表示
+      pointImage.style.display = 'block';
     }
 
-    // 生徒IDの表示
     const studentIdElem = document.getElementById('studentId');
     studentIdElem.textContent = `生徒コード: ${studentId}`;
 
-    // Google Apps Scriptへデータ送信
     const encodedStudentId = encodeURIComponent(studentId);
     const scriptUrl = `https://script.google.com/macros/s/AKfycbzhBvWFMzU1Gz9Q1RDD7MnYTbJCuWHXU8YAeTHvTiGvs8sF4eEAZVDc79l61UjIJ3Bn/exec?studentId=${encodedStudentId}`;
     let isScanning = false;
@@ -227,13 +231,12 @@
         console.error("エラーが発生しました:", error);
       })
       .finally(() => {
-        isScanning = false; // スキャン処理が完了したらリセット
+        isScanning = false;
       });
 
-    // スキャン回数を生徒ごとに保存
     localStorage.setItem(scanCountKey, scanCount);
 
-    const closeDelay = scanCount % 2 !== 0 ? 3000 : 5000; // 開始時は3秒、終了時は5秒
+    const closeDelay = scanCount % 2 !== 0 ? 33000 : 15000;
     setTimeout(() => {
       if (window.opener && typeof window.opener.notifyTabClosed === 'function') {
         window.opener.notifyTabClosed();
@@ -243,6 +246,8 @@
   </script>
 </body>
 </html>
+
+
 
 
 
