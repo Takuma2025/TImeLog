@@ -59,7 +59,7 @@
     }
 
     #reminder {
-      margin-top: 10px;
+      margin-top: 30px;
       font-size: 2em;
       color: #FFFFFF;
       display: none;
@@ -76,7 +76,7 @@
     }
 
     #studyTime {
-      margin-top: 30px;
+      margin-top: 20px;
       font-size: 2.5em;
       color: #ffffff;
       text-align: center;
@@ -90,12 +90,12 @@
     }
 
     #studyTime .value {
-      font-size: 1.5em;
+      font-size: 2em;
       color: #33ff28;
     }
 
     #experiencePoints {
-      margin-top: 20px;
+      margin-top: 10px;
       font-size: 2em;
       color: rgb(60, 245, 255);
       font-family: 'Arial', sans-serif;
@@ -103,7 +103,7 @@
 
     #libraryCardPoints {
       margin-top: 10px;
-      font-size: 1.8em;
+      font-size: 2em;
       color: #eeff00;
     }
 
@@ -135,7 +135,7 @@
     <div id="status"></div>
   </div>
   <img id="statusImage" src="list.png" alt="開始画像">
-  <div id="reminder">自習を開始する前に、手帳を見て何をするか確認しよう。<br>まだ書いていない人は、何をするか書き出そう。</div>
+  <div id="reminder">リーチング学習手帳を見て今日することを確認しよう。<br>まだ書いていない人は、今日何をするか書き出そう。</div>
   <div id="studyTime"></div>
   <div id="experiencePoints"></div>
   <div id="libraryCardPoints"></div>
@@ -150,7 +150,7 @@
 
     function extractStudentId(data) {
       const match = data.match(/studentId=(\S+)/);
-      return match ? match[1] : '生徒コードが見つかりません';
+      return match ? match[1] : '自習IDが見つかりません';
     }
 
     const studentId = extractStudentId(data);
@@ -198,18 +198,18 @@
       `;
 
       experiencePoints = studyTimeSeconds;
-      experiencePointsElem.innerHTML = `▶ 経験値ポイントが ${experiencePoints} EP上がった !`;
+      experiencePointsElem.innerHTML = `▶ 経験値ポイントが <b>${experiencePoints} EP</b>上がった !`;
 
       const libraryCardPoints = Math.floor(experiencePoints * 0.1);
       const libraryCardPointsElem = document.getElementById('libraryCardPoints');
-      libraryCardPointsElem.innerHTML = `▶ 図書カードポイントが ${libraryCardPoints} BP貯まった !`;
+      libraryCardPointsElem.innerHTML = `▶ 図書カードポイントが <b>${libraryCardPoints} BP</b>貯まった !`;
 
       const pointImage = document.getElementById('pointImage');
       pointImage.style.display = 'block';
     }
 
     const studentIdElem = document.getElementById('studentId');
-    studentIdElem.textContent = `生徒コード: ${studentId}`;
+    studentIdElem.textContent = `自習ID: ${studentId}`;
 
     const encodedStudentId = encodeURIComponent(studentId);
     const scriptUrl = `https://script.google.com/macros/s/AKfycbzhBvWFMzU1Gz9Q1RDD7MnYTbJCuWHXU8YAeTHvTiGvs8sF4eEAZVDc79l61UjIJ3Bn/exec?studentId=${encodedStudentId}`;
