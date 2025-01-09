@@ -236,7 +236,7 @@
 
     localStorage.setItem(scanCountKey, scanCount);
 
-    const closeDelay = scanCount % 2 !== 0 ? 6000 : 6000;
+    const closeDelay = scanCount % 2 !== 0 ? 5000 : 5000;
     setTimeout(() => {
       if (window.opener && typeof window.opener.notifyTabClosed === 'function') {
         window.opener.notifyTabClosed();
