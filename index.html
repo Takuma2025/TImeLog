@@ -30,7 +30,6 @@
       padding: 30px;
       border-radius: 12px;
       box-shadow: 0 8px 25px rgba(0, 0, 0, 0.751);
-      max-height: auto;
       max-width: 700px;
       width: 100%;
       text-align: center;
@@ -69,16 +68,29 @@
     }
 
     /* カメラ映像のスタイル */
-    #video {
-      width: 100%;
-      height: auto; /* 高さを自動調整 */
-      max-height:600px; 
-      max-width: 600px; 
-      border: 3px solid #FFFFFF;
-      border-radius: 12px;
-      background-color: #000;
-      transition: transform 0.3s ease;
-    }
+    #video-container {
+  position: relative;
+  width: 100%; /* 親要素の幅に合わせる */
+  max-width: 600px; /* 最大幅を設定 */
+  height: auto;
+  max-height: 600px; /* 最大高さを設定 */
+  border: 3px solid #FFFFFF; /* 白い枠線 */
+  border-radius: 12px; /* 角を丸くする */
+  box-sizing: border-box; /* 枠線を含めてサイズを計算 */
+  background-color: #000; /* 映像の背景色（黒） */
+  display: flex; /* フレックスボックスを使用 */
+  align-items: center; /* 垂直方向で中央揃え */
+  justify-content: center; /* 水平方向で中央揃え */
+  margin: auto; /* 上下左右のマージンを自動に設定 */
+}
+
+
+#video {
+  width: 100%; /* 親要素に対して幅を100% */
+  height: auto; /* アスペクト比を保持して高さを調整 */
+  border-radius: 8px; /* 枠線の角に合わせて映像も丸くする */
+  box-sizing: border-box; /* 枠線を含めたサイズ計算 */
+}
 
     /* スキャン結果とインジケーターの親要素のスタイル */
     .scan-status {
@@ -126,7 +138,7 @@
       position: absolute;
       top: -4px; /* 初期位置は画面の上に設定 */
       left: 50%; /* 横線を中央揃えにする */
-      width: 86%; /* 横線の幅を80%に設定（少し短くする） */
+      width: 100%; /* 横線の幅を80%に設定（少し短くする） */
       height: 4px;
       background-color: rgba(255, 255, 255, 0.8);
       animation: scanLineAnimation 4s infinite linear; /* 4秒に変更 */
