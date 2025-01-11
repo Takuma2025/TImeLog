@@ -51,13 +51,6 @@
       margin-right: 10px;
     }
 
-    #statusImage {
-      margin-top: 20px;
-      width: 300px;
-      height: auto;
-      display: none;
-    }
-
     #reminder {
       margin-top: 30px;
       font-size: 2em;
@@ -83,7 +76,7 @@
     }
 
     #studyTime .label {
-      font-size: 1em;
+      font-size: 0.8em;
       color: rgb(255, 255, 255);
       display: block;
       margin-bottom: 5px;
@@ -134,8 +127,7 @@
   <div id="status-container">
     <div id="status"></div>
   </div>
-  <img id="statusImage" src="list.png" alt="開始画像">
-  <div id="reminder">リーチング学習手帳を見て今日することを確認しよう。<br>まだ書いていない人は、今日何をするか書き出そう。</div>
+  <div id="reminder">今日も集中してがんばろう！</div>
   <div id="studyTime"></div>
   <div id="experiencePoints"></div>
   <div id="libraryCardPoints"></div>
@@ -165,50 +157,47 @@
     const messageElem = document.getElementById('message');
     const studyTimeElem = document.getElementById('studyTime');
     const experiencePointsElem = document.getElementById('experiencePoints');
+    const statusImage = document.getElementById('statusImage');
+    const reminderElem = document.getElementById('reminder');
 
     let experiencePoints = 0;
 
-if (scanCount % 2 !== 0) {
-  // 開始時の設定
-  statusElem.innerHTML = `<i class="fas fa-pencil-alt"></i><strong>開始</strong>`;
-  statusContainer.style.backgroundColor = 'green';
+    if (scanCount % 2 !== 0) {
+      statusElem.innerHTML = `<i class="fas fa-pencil-alt"></i><strong>開始</strong>`;
+      statusContainer.style.backgroundColor = 'green';
+      reminderElem.style.display = 'block';
 
-  // 「今日も集中してがんばろう！」のコメントを表示
-  const reminderElem = document.getElementById('reminder');
-  reminderElem.textContent = "今日も集中してがんばろう！";
-  reminderElem.style.display = 'block';
+      const startTime = new Date();
+      localStorage.setItem(startTimeKey, startTime.toISOString());
+    } else {
+      statusElem.innerHTML = `<i class="fas fa-pencil-alt"></i><strong>終了</strong>`;
+      statusContainer.style.backgroundColor = 'red';
+      reminderElem.style.display = 'none';
 
-  const startTime = new Date();
-  localStorage.setItem(startTimeKey, startTime.toISOString());
-} else {
-  // 終了時の設定
-  statusElem.innerHTML = `<i class="fas fa-pencil-alt"></i><strong>終了</strong>`;
-  statusContainer.style.backgroundColor = 'red';
+      const endTime = new Date();
+      const startTime = new Date(localStorage.getItem(startTimeKey));
 
-  const endTime = new Date();
-  const startTime = new Date(localStorage.getItem(startTimeKey));
+      const studyTimeMs = endTime - startTime;
+      const studyTimeSeconds = Math.floor(studyTimeMs / 1000);
+      const studyTimeMinutes = Math.floor(studyTimeSeconds / 60);
+      const remainingSeconds = studyTimeSeconds % 60;
 
-  const studyTimeMs = endTime - startTime;
-  const studyTimeSeconds = Math.floor(studyTimeMs / 1000);
-  const studyTimeMinutes = Math.floor(studyTimeSeconds / 60);
-  const remainingSeconds = studyTimeSeconds % 60;
+      studyTimeElem.innerHTML = `
+        <span class="label">記録した自習時間</span>
+        <span class="value">${studyTimeMinutes}分 ${remainingSeconds}秒</span>
+      `;
 
-  studyTimeElem.innerHTML = `
-    <span class="label">記録した自習時間</span>
-    <span class="value">${studyTimeMinutes}分 ${remainingSeconds}秒</span>
-  `;
+      experiencePoints = studyTimeSeconds;
+      experiencePointsElem.innerHTML = `▶ 経験値ポイントが <b>${experiencePoints} EP</b>上がった !`;
 
-  experiencePoints = studyTimeSeconds;
-  experiencePointsElem.innerHTML = `▶ 経験値ポイントが <b>${experiencePoints} EP</b>上がった !`;
+      const libraryCardPoints = Math.floor(experiencePoints * 0.1);
+      const libraryCardPointsElem = document.getElementById('libraryCardPoints');
+      libraryCardPointsElem.innerHTML = `▶ 図書カードポイントが <b>${libraryCardPoints} BP</b>貯まった !`;
 
-  const libraryCardPoints = Math.floor(experiencePoints * 0.1);
-  const libraryCardPointsElem = document.getElementById('libraryCardPoints');
-  libraryCardPointsElem.innerHTML = `▶ 図書カードポイントが <b>${libraryCardPoints} BP</b>貯まった !`;
+      const pointImage = document.getElementById('pointImage');
+      pointImage.style.display = 'block';
+    }
 
-  // 「終了時」の場合、reminder要素を非表示にする
-  const reminderElem = document.getElementById('reminder');
-  reminderElem.style.display = 'none';
-}
     const studentIdElem = document.getElementById('studentId');
     studentIdElem.textContent = `自習ID: ${studentId}`;
 
