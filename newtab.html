@@ -83,7 +83,7 @@
     }
 
     #studyTime .label {
-      font-size: 0.6em;
+      font-size: 1em;
       color: rgb(255, 255, 255);
       display: block;
       margin-bottom: 5px;
@@ -165,49 +165,50 @@
     const messageElem = document.getElementById('message');
     const studyTimeElem = document.getElementById('studyTime');
     const experiencePointsElem = document.getElementById('experiencePoints');
-    const statusImage = document.getElementById('statusImage');
-    const reminderElem = document.getElementById('reminder');
 
     let experiencePoints = 0;
 
-    if (scanCount % 2 !== 0) {
-      statusElem.innerHTML = `<i class="fas fa-pencil-alt"></i><strong>開始</strong>`;
-      statusContainer.style.backgroundColor = 'green';
-      statusImage.style.display = 'block';
-      reminderElem.style.display = 'block';
+if (scanCount % 2 !== 0) {
+  // 開始時の設定
+  statusElem.innerHTML = `<i class="fas fa-pencil-alt"></i><strong>開始</strong>`;
+  statusContainer.style.backgroundColor = 'green';
 
-      const startTime = new Date();
-      localStorage.setItem(startTimeKey, startTime.toISOString());
-    } else {
-      statusElem.innerHTML = `<i class="fas fa-pencil-alt"></i><strong>終了</strong>`;
-      statusContainer.style.backgroundColor = 'red';
-      statusImage.style.display = 'none';
-      reminderElem.style.display = 'none';
+  // 「今日も集中してがんばろう！」のコメントを表示
+  const reminderElem = document.getElementById('reminder');
+  reminderElem.textContent = "今日も集中してがんばろう！";
+  reminderElem.style.display = 'block';
 
-      const endTime = new Date();
-      const startTime = new Date(localStorage.getItem(startTimeKey));
+  const startTime = new Date();
+  localStorage.setItem(startTimeKey, startTime.toISOString());
+} else {
+  // 終了時の設定
+  statusElem.innerHTML = `<i class="fas fa-pencil-alt"></i><strong>終了</strong>`;
+  statusContainer.style.backgroundColor = 'red';
 
-      const studyTimeMs = endTime - startTime;
-      const studyTimeSeconds = Math.floor(studyTimeMs / 1000);
-      const studyTimeMinutes = Math.floor(studyTimeSeconds / 60);
-      const remainingSeconds = studyTimeSeconds % 60;
+  const endTime = new Date();
+  const startTime = new Date(localStorage.getItem(startTimeKey));
 
-      studyTimeElem.innerHTML = `
-        <span class="label">記録した自習時間</span>
-        <span class="value">${studyTimeMinutes}分 ${remainingSeconds}秒</span>
-      `;
+  const studyTimeMs = endTime - startTime;
+  const studyTimeSeconds = Math.floor(studyTimeMs / 1000);
+  const studyTimeMinutes = Math.floor(studyTimeSeconds / 60);
+  const remainingSeconds = studyTimeSeconds % 60;
 
-      experiencePoints = studyTimeSeconds;
-      experiencePointsElem.innerHTML = `▶ 経験値ポイントが <b>${experiencePoints} EP</b>上がった !`;
+  studyTimeElem.innerHTML = `
+    <span class="label">記録した自習時間</span>
+    <span class="value">${studyTimeMinutes}分 ${remainingSeconds}秒</span>
+  `;
 
-      const libraryCardPoints = Math.floor(experiencePoints * 0.1);
-      const libraryCardPointsElem = document.getElementById('libraryCardPoints');
-      libraryCardPointsElem.innerHTML = `▶ 図書カードポイントが <b>${libraryCardPoints} BP</b>貯まった !`;
+  experiencePoints = studyTimeSeconds;
+  experiencePointsElem.innerHTML = `▶ 経験値ポイントが <b>${experiencePoints} EP</b>上がった !`;
 
-      const pointImage = document.getElementById('pointImage');
-      pointImage.style.display = 'block';
-    }
+  const libraryCardPoints = Math.floor(experiencePoints * 0.1);
+  const libraryCardPointsElem = document.getElementById('libraryCardPoints');
+  libraryCardPointsElem.innerHTML = `▶ 図書カードポイントが <b>${libraryCardPoints} BP</b>貯まった !`;
 
+  // 「終了時」の場合、reminder要素を非表示にする
+  const reminderElem = document.getElementById('reminder');
+  reminderElem.style.display = 'none';
+}
     const studentIdElem = document.getElementById('studentId');
     studentIdElem.textContent = `自習ID: ${studentId}`;
 
