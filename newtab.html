@@ -18,6 +18,21 @@
       padding: 20px;
       box-sizing: border-box;
       text-align: center;
+      overflow: hidden;
+    }
+
+    video#background-video {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      min-width: 100%;
+      min-height: 100%;
+      width: auto;
+      height: auto;
+      z-index: -1;
+      object-fit: cover;
+      display: none;
     }
 
     h1 {
@@ -123,6 +138,12 @@
   </style>
 </head>
 <body>
+  <video id="background-video" autoplay loop muted>
+    <source src="pointcoinvideo.mp4" type="video/mp4">
+    <source src="background.webm" type="video/webm">
+    お使いのブラウザは動画タグをサポートしていません。
+  </video>
+
   <div id="message"></div>
   <div id="status-container">
     <div id="status"></div>
@@ -133,8 +154,6 @@
   <div id="libraryCardPoints"></div>
   <div id="badge"></div>
   <div id="studentId"></div>
-
-  <img id="pointImage" src="point.png" alt="ポイント画像">
 
   <script>
     const params = new URLSearchParams(location.search);
@@ -162,10 +181,13 @@
 
     let experiencePoints = 0;
 
+    const backgroundVideo = document.getElementById('background-video');
+
     if (scanCount % 2 !== 0) {
       statusElem.innerHTML = `<i class="fas fa-pencil-alt"></i><strong>開始</strong>`;
       statusContainer.style.backgroundColor = 'green';
       reminderElem.style.display = 'block';
+      backgroundVideo.style.display = 'none';
 
       const startTime = new Date();
       localStorage.setItem(startTimeKey, startTime.toISOString());
@@ -173,6 +195,11 @@
       statusElem.innerHTML = `<i class="fas fa-pencil-alt"></i><strong>終了</strong>`;
       statusContainer.style.backgroundColor = 'red';
       reminderElem.style.display = 'none';
+      backgroundVideo.style.display = 'block';
+
+      setTimeout(() => {
+        backgroundVideo.style.display = 'none';
+      }, 5000);
 
       const endTime = new Date();
       const startTime = new Date(localStorage.getItem(startTimeKey));
@@ -194,8 +221,6 @@
       const libraryCardPointsElem = document.getElementById('libraryCardPoints');
       libraryCardPointsElem.innerHTML = `▶ 図書カードポイントが <b>${libraryCardPoints} BP</b>貯まった !`;
 
-      const pointImage = document.getElementById('pointImage');
-      pointImage.style.display = 'block';
     }
 
     const studentIdElem = document.getElementById('studentId');
@@ -236,6 +261,8 @@
   </script>
 </body>
 </html>
+
+
 
 
 
