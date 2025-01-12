@@ -135,7 +135,7 @@
   </style>
 </head>
 <body>
-  <video id="videoBackground" autoplay loop muted>
+  <video id="videoBackground" autoplay loop muted preload="auto">
     <source src="pointcoinvideo.mp4" type="video/mp4">
     お使いのブラウザは動画タグに対応していません。
   </video>
@@ -167,11 +167,6 @@
 
     const now = Date.now();
     const lastScanTime = parseInt(localStorage.getItem(lastScanTimeKey)) || 0;
-
-    if (now - lastScanTime < 15000) {
-      alert("前回のスキャンから15秒未満です。もう少しお待ちください。");
-      throw new Error("連続スキャン防止のため処理を中断しました。");
-    }
 
     localStorage.setItem(lastScanTimeKey, now);
 
@@ -253,7 +248,7 @@
 
     localStorage.setItem(scanCountKey, scanCount);
 
-    const closeDelay = scanCount % 2 !== 0 ? 5000 : 15000;
+    const closeDelay = scanCount % 2 !== 0 ? 5000 : 5000;
     setTimeout(() => {
       if (window.opener && typeof window.opener.notifyTabClosed === 'function') {
         window.opener.notifyTabClosed();
