@@ -18,7 +18,7 @@
       padding: 20px;
       box-sizing: border-box;
       text-align: center;
-      transition: background 0.5s ease;
+      overflow: hidden;
     }
 
     h1 {
@@ -135,10 +135,8 @@
   </style>
 </head>
 <body>
-  <video id="videoBackground" autoplay loop muted preload="auto">
-    <source src="pointcoinvideo.mp4" type="video/mp4">
-    お使いのブラウザは動画タグに対応していません。
-  </video>
+
+  <video id="videoBackground" src="background.mp4" autoplay muted preload="auto"></video>
 
   <div id="message"></div>
   <div id="status-container">
@@ -148,7 +146,6 @@
   <div id="studyTime"></div>
   <div id="experiencePoints"></div>
   <div id="libraryCardPoints"></div>
-  <div id="badge"></div>
   <div id="studentId"></div>
 
   <script>
@@ -163,12 +160,6 @@
     const studentId = extractStudentId(data);
     const scanCountKey = `scanCount_${studentId}`;
     const startTimeKey = `startTime_${studentId}`;
-    const lastScanTimeKey = `lastScanTime_${studentId}`;
-
-    const now = Date.now();
-    const lastScanTime = parseInt(localStorage.getItem(lastScanTimeKey)) || 0;
-
-    localStorage.setItem(lastScanTimeKey, now);
 
     let scanCount = parseInt(localStorage.getItem(scanCountKey)) || 0;
     scanCount++;
@@ -188,7 +179,6 @@
       statusElem.innerHTML = `<i class="fas fa-pencil-alt"></i><strong>開始</strong>`;
       statusContainer.style.backgroundColor = 'green';
       reminderElem.style.display = 'block';
-      videoBackground.style.display = 'none';
 
       const startTime = new Date();
       localStorage.setItem(startTimeKey, startTime.toISOString());
@@ -196,7 +186,6 @@
       statusElem.innerHTML = `<i class="fas fa-pencil-alt"></i><strong>終了</strong>`;
       statusContainer.style.backgroundColor = 'red';
       reminderElem.style.display = 'none';
-      videoBackground.style.display = 'block';
 
       const endTime = new Date();
       const startTime = new Date(localStorage.getItem(startTimeKey));
@@ -218,6 +207,11 @@
       const libraryCardPointsElem = document.getElementById('libraryCardPoints');
       libraryCardPointsElem.innerHTML = `▶ 図書カードポイントが <b>${libraryCardPoints} BP</b>貯まった !`;
 
+      // 動画を背景に表示
+      videoBackground.style.display = 'block';
+      videoBackground.onended = () => {
+        videoBackground.style.display = 'none';
+      };
     }
 
     const studentIdElem = document.getElementById('studentId');
@@ -248,7 +242,7 @@
 
     localStorage.setItem(scanCountKey, scanCount);
 
-    const closeDelay = scanCount % 2 !== 0 ? 5000 : 5000;
+    const closeDelay = scanCount % 2 !== 0 ? 5000 : 15000; // 終了時は15秒に延長
     setTimeout(() => {
       if (window.opener && typeof window.opener.notifyTabClosed === 'function') {
         window.opener.notifyTabClosed();
@@ -258,6 +252,7 @@
   </script>
 </body>
 </html>
+
 
 
 
