@@ -101,36 +101,35 @@
       color: #eeff00;
     }
 
+    /* ▼ ここから point.png 下からゆっくり出す用の修正 ▼ */
     #pointImage {
-      display: none;
+      display: none;                  /* 最初は非表示 */
       position: fixed;
-      bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
-      width: 500px;
+      max-width: 800px;
       height: auto;
       z-index: 1000;
+
+      /* 初期状態は画面外(下)＋透明に */
+      bottom: -200px;
+      opacity: 0;
+
+      /* トランジションでなめらかに移動＆フェードイン */
+      transition: bottom 1.5s ease, opacity 1.5s ease;
     }
 
-    #videoBackground {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      width: 768px; /* iPad縦向きの幅 */
-      height: 1024px; /* iPad縦向きの高さ */
-      transform: translate(-50%, -50%);
-      object-fit: cover;
-      z-index: -1;
-      display: none;
-      border-radius: 15px; /* 必要に応じて角丸に */
-      overflow: hidden;
+    /* .show クラスが付与されたときに画面に出る */
+    #pointImage.show {
+      bottom: 20px;
+      opacity: 1;
     }
+    /* ▲ 修正ここまで ▲ */
 
     @media (max-width: 600px) {
       h1 {
         font-size: 1.5em;
       }
-
       #status-container, #studentId, #studyTime {
         font-size: 1.5em;
       }
@@ -138,8 +137,6 @@
   </style>
 </head>
 <body>
-
-  <video id="videoBackground" src="background.mp4" autoplay muted preload="auto"></video>
 
   <div id="message"></div>
   <div id="status-container">
@@ -149,7 +146,10 @@
   <div id="studyTime"></div>
   <div id="experiencePoints"></div>
   <div id="libraryCardPoints"></div>
+  <div id="badge"></div>
   <div id="studentId"></div>
+
+  <img id="pointImage" src="point.png" alt="ポイント画像">
 
   <script>
     const params = new URLSearchParams(location.search);
@@ -174,9 +174,10 @@
     const experiencePointsElem = document.getElementById('experiencePoints');
     const statusImage = document.getElementById('statusImage');
     const reminderElem = document.getElementById('reminder');
-    const videoBackground = document.getElementById('videoBackground');
 
     let experiencePoints = 0;
+
+    const backgroundVideo = document.getElementById('background-video');
 
     if (scanCount % 2 !== 0) {
       statusElem.innerHTML = `<i class="fas fa-pencil-alt"></i><strong>開始</strong>`;
@@ -210,20 +211,14 @@
       const libraryCardPointsElem = document.getElementById('libraryCardPoints');
       libraryCardPointsElem.innerHTML = `▶ 図書カードポイントが <b>${libraryCardPoints} BP</b>貯まった !`;
 
-      // 動画を背景に表示
-      videoBackground.style.display = 'block';
-      videoBackground.onended = () => {
-        videoBackground.style.display = 'none';
-      };
+      const pointImage = document.getElementById('pointImage');
+      pointImage.style.display = 'block';
 
-      // カメラを15秒間休止
-      const cameraElem = document.getElementById('cameraElement'); // 仮のカメラ要素
-      if (cameraElem) {
-        cameraElem.style.display = 'none'; // カメラを非表示に
-        setTimeout(() => {
-          cameraElem.style.display = 'block'; // 15秒後に再表示
-        }, 15000);
-      }
+      // ▼ 下からゆっくり出すためのクラス付け
+      // 一度強制リフローを挟む or 少しだけ待つとアニメがスムーズに効く
+      pointImage.offsetWidth; 
+      pointImage.classList.add('show');
+      // ▲ 修正ここまで
     }
 
     const studentIdElem = document.getElementById('studentId');
@@ -254,7 +249,7 @@
 
     localStorage.setItem(scanCountKey, scanCount);
 
-    const closeDelay = scanCount % 2 !== 0 ? 5000 : 15000; // 終了時は15秒に延長
+    const closeDelay = scanCount % 2 !== 0 ? 5000 : 5000;
     setTimeout(() => {
       if (window.opener && typeof window.opener.notifyTabClosed === 'function') {
         window.opener.notifyTabClosed();
@@ -264,9 +259,6 @@
   </script>
 </body>
 </html>
-
-
-
 
 
 
