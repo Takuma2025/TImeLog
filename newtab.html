@@ -18,21 +18,7 @@
       padding: 20px;
       box-sizing: border-box;
       text-align: center;
-      overflow: hidden;
-    }
-
-    video#background-video {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      min-width: 100%;
-      min-height: 100%;
-      width: auto;
-      height: auto;
-      z-index: -1;
-      object-fit: cover;
-      display: none;
+      transition: background 0.5s ease;
     }
 
     h1 {
@@ -126,6 +112,17 @@
       z-index: 1000;
     }
 
+    #videoBackground {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -1;
+      display: none;
+    }
+
     @media (max-width: 600px) {
       h1 {
         font-size: 1.5em;
@@ -138,10 +135,9 @@
   </style>
 </head>
 <body>
-  <video id="background-video" autoplay loop muted>
+  <video id="videoBackground" autoplay loop muted>
     <source src="pointcoinvideo.mp4" type="video/mp4">
-    <source src="background.webm" type="video/webm">
-    お使いのブラウザは動画タグをサポートしていません。
+    お使いのブラウザは動画タグに対応していません。
   </video>
 
   <div id="message"></div>
@@ -167,6 +163,17 @@
     const studentId = extractStudentId(data);
     const scanCountKey = `scanCount_${studentId}`;
     const startTimeKey = `startTime_${studentId}`;
+    const lastScanTimeKey = `lastScanTime_${studentId}`;
+
+    const now = Date.now();
+    const lastScanTime = parseInt(localStorage.getItem(lastScanTimeKey)) || 0;
+
+    if (now - lastScanTime < 15000) {
+      alert("前回のスキャンから15秒未満です。もう少しお待ちください。");
+      throw new Error("連続スキャン防止のため処理を中断しました。");
+    }
+
+    localStorage.setItem(lastScanTimeKey, now);
 
     let scanCount = parseInt(localStorage.getItem(scanCountKey)) || 0;
     scanCount++;
@@ -178,16 +185,15 @@
     const experiencePointsElem = document.getElementById('experiencePoints');
     const statusImage = document.getElementById('statusImage');
     const reminderElem = document.getElementById('reminder');
+    const videoBackground = document.getElementById('videoBackground');
 
     let experiencePoints = 0;
-
-    const backgroundVideo = document.getElementById('background-video');
 
     if (scanCount % 2 !== 0) {
       statusElem.innerHTML = `<i class="fas fa-pencil-alt"></i><strong>開始</strong>`;
       statusContainer.style.backgroundColor = 'green';
       reminderElem.style.display = 'block';
-      backgroundVideo.style.display = 'none';
+      videoBackground.style.display = 'none';
 
       const startTime = new Date();
       localStorage.setItem(startTimeKey, startTime.toISOString());
@@ -195,11 +201,7 @@
       statusElem.innerHTML = `<i class="fas fa-pencil-alt"></i><strong>終了</strong>`;
       statusContainer.style.backgroundColor = 'red';
       reminderElem.style.display = 'none';
-      backgroundVideo.style.display = 'block';
-
-      setTimeout(() => {
-        backgroundVideo.style.display = 'none';
-      }, 5000);
+      videoBackground.style.display = 'block';
 
       const endTime = new Date();
       const startTime = new Date(localStorage.getItem(startTimeKey));
@@ -251,7 +253,7 @@
 
     localStorage.setItem(scanCountKey, scanCount);
 
-    const closeDelay = scanCount % 2 !== 0 ? 5000 : 5000;
+    const closeDelay = scanCount % 2 !== 0 ? 5000 : 15000;
     setTimeout(() => {
       if (window.opener && typeof window.opener.notifyTabClosed === 'function') {
         window.opener.notifyTabClosed();
