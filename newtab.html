@@ -111,17 +111,16 @@
       height: auto;
       z-index: 1000;
 
-      /* 初期状態は画面外(下)＋透明に */
+      /* 初期状態は画面外(下)*/
       bottom: -200px;
-      opacity: 0;
 
       /* トランジションでなめらかに移動＆フェードイン */
-      transition: bottom 1.5s ease, opacity 1.5s ease;
+      transition: bottom 1.5s ease;
     }
 
     /* .show クラスが付与されたときに画面に出る */
     #pointImage.show {
-      bottom: 20px;
+      bottom: 80px;
       opacity: 1;
     }
     /* ▲ 修正ここまで ▲ */
