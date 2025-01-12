@@ -215,6 +215,15 @@
       videoBackground.onended = () => {
         videoBackground.style.display = 'none';
       };
+
+      // カメラを15秒間休止
+      const cameraElem = document.getElementById('cameraElement'); // 仮のカメラ要素
+      if (cameraElem) {
+        cameraElem.style.display = 'none'; // カメラを非表示に
+        setTimeout(() => {
+          cameraElem.style.display = 'block'; // 15秒後に再表示
+        }, 15000);
+      }
     }
 
     const studentIdElem = document.getElementById('studentId');
