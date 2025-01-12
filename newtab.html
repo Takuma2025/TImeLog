@@ -20,19 +20,16 @@
       text-align: center;
       overflow: hidden;
     }
-
     h1 {
       margin-bottom: 20px;
       font-size: 3em;
       font-weight: normal;
     }
-
     #message {
       font-size: 2em;
       margin-bottom: 10px;
       font-weight: normal;
     }
-
     #status-container {
       margin-bottom: 20px;
       padding: 20px;
@@ -47,78 +44,102 @@
       transition: background-color 0.5s ease;
       position: relative;
     }
-
     #status-container i {
       margin-right: 10px;
     }
-
     #reminder {
       margin-top: 30px;
       font-size: 2em;
       color: #FFFFFF;
       display: none;
     }
-
     #studentId {
       font-size: 1.5em;
-      margin-top: 20px;
+      margin-top: 50px;
       background-color: rgba(255, 255, 255, 0.2);
       border-radius: 8px;
       padding: 15px;
       max-width: 600px;
       word-wrap: break-word;
     }
-
     #studyTime {
       margin-top: 20px;
       font-size: 2.5em;
       color: #ffffff;
       text-align: center;
     }
-
     #studyTime .label {
       font-size: 0.8em;
       color: rgb(255, 255, 255);
       display: block;
       margin-bottom: 5px;
     }
-
     #studyTime .value {
       font-size: 2em;
       color: #33ff28;
     }
 
+    /* ▼ 経験値ポイントと図書カードポイント表示用のスタイル ▼ */
+    #pointsContainer {
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+      max-width: 600px;
+      margin-top: 20px;
+    }
+    /* 経験値ポイント */
     #experiencePoints {
-      margin-top: 10px;
+      text-align: center;
+      padding: 15px;
+      border-radius: 8px;
+      background-color: rgba(60, 245, 255, 0.2);
+      flex: 1;
+      margin: 0 10px;
+    }
+    #experiencePoints .point-label {
       font-size: 2em;
       color: rgb(60, 245, 255);
-      font-family: 'Arial', sans-serif;
+      margin-bottom: 5px;
     }
 
+    /* 図書カードポイント */
     #libraryCardPoints {
-      margin-top: 10px;
+      text-align: center;
+      padding: 15px;
+      border-radius: 8px;
+      background-color: rgba(238, 255, 0, 0.2);
+      flex: 1;
+      margin: 0 10px;
+    }
+    #libraryCardPoints .point-label {
       font-size: 2em;
       color: #eeff00;
+      margin-bottom: 5px;
     }
 
-    /* ▼ ここから point.png 下からゆっくり出す用の修正 ▼ */
+    /* 数値部分（大きく表示） */
+    .point-value .number {
+      font-size: 4em !important;
+      line-height: 1;
+    }
+    /* 補助テキスト部分（小さく表示） */
+    .point-value .small-text {
+      font-size: 2em !important;
+    }
+    /* ▲ ここまで ▲ */
+
+    /* ▼ point.png 下からゆっくり出す用の修正 ▼ */
     #pointImage {
-      display: none;                  /* 最初は非表示 */
+      display: none;                   /* 最初は非表示 */
       position: fixed;
       left: 50%;
       transform: translateX(-50%);
       max-width: 800px;
       height: auto;
       z-index: 1000;
-
-      /* 初期状態は画面外(下)*/
-      bottom: -200px;
-
-      /* トランジションでなめらかに移動＆フェードイン */
+      bottom: -200px;                  /* 初期状態は画面外(下) */
       transition: bottom 1.5s ease;
     }
-
-    /* .show クラスが付与されたときに画面に出る */
     #pointImage.show {
       bottom: 90px;
       opacity: 1;
@@ -132,6 +153,7 @@
       #status-container, #studentId, #studyTime {
         font-size: 1.5em;
       }
+      /* 必要に応じてメディアクエリ内でのフォントサイズ調整を行ってください */
     }
   </style>
 </head>
@@ -141,10 +163,16 @@
   <div id="status-container">
     <div id="status"></div>
   </div>
-  <div id="reminder">今日も集中してがんばろう！</div>
+  <div id="reminder">集中してがんばろう！</div>
   <div id="studyTime"></div>
-  <div id="experiencePoints"></div>
-  <div id="libraryCardPoints"></div>
+  
+  <!-- ▼ 経験値ポイントと図書カードポイント表示用コンテナ ▼ -->
+  <div id="pointsContainer">
+    <div id="experiencePoints"></div>
+    <div id="libraryCardPoints"></div>
+  </div>
+  <!-- ▲ ここまで ▲ -->
+  
   <div id="badge"></div>
   <div id="studentId"></div>
 
@@ -171,14 +199,16 @@
     const messageElem = document.getElementById('message');
     const studyTimeElem = document.getElementById('studyTime');
     const experiencePointsElem = document.getElementById('experiencePoints');
-    const statusImage = document.getElementById('statusImage');
+    const libraryCardPointsElem = document.getElementById('libraryCardPoints');
     const reminderElem = document.getElementById('reminder');
+    const pointsContainer = document.getElementById('pointsContainer');
 
     let experiencePoints = 0;
 
-    const backgroundVideo = document.getElementById('background-video');
-
     if (scanCount % 2 !== 0) {
+      // 開始時はポイント表示コンテナを非表示に
+      pointsContainer.style.display = 'none';
+
       statusElem.innerHTML = `<i class="fas fa-pencil-alt"></i><strong>開始</strong>`;
       statusContainer.style.backgroundColor = 'green';
       reminderElem.style.display = 'block';
@@ -186,6 +216,9 @@
       const startTime = new Date();
       localStorage.setItem(startTimeKey, startTime.toISOString());
     } else {
+      // 終了時はポイント表示コンテナを表示
+      pointsContainer.style.display = 'flex';
+
       statusElem.innerHTML = `<i class="fas fa-pencil-alt"></i><strong>終了</strong>`;
       statusContainer.style.backgroundColor = 'red';
       reminderElem.style.display = 'none';
@@ -204,18 +237,30 @@
       `;
 
       experiencePoints = studyTimeSeconds;
-      experiencePointsElem.innerHTML = `▶ 経験値ポイントが <b>${experiencePoints} EP</b>上がった !`;
-
+      
+      // 経験値ポイント表示（数値部分は <span class="number">、補助テキストは <span class="small-text">）
+      experiencePointsElem.innerHTML = `
+        <div class="point-label">経験値<br>ポイント</div>
+        <div class="point-value">
+          <span class="number">${experiencePoints}</span><br>
+          <span class="small-text">EPゲット!</span>
+        </div>
+      `;
+      
       const libraryCardPoints = Math.floor(experiencePoints * 0.1);
-      const libraryCardPointsElem = document.getElementById('libraryCardPoints');
-      libraryCardPointsElem.innerHTML = `▶ 図書カードポイントが <b>${libraryCardPoints} BP</b>貯まった !`;
+      libraryCardPointsElem.innerHTML = `
+        <div class="point-label">図書カード<br>ポイント</div>
+        <div class="point-value">
+          <span class="number">${libraryCardPoints}</span><br>
+          <span class="small-text">BPゲット!</span>
+        </div>
+      `;
 
       const pointImage = document.getElementById('pointImage');
       pointImage.style.display = 'block';
 
       // ▼ 下からゆっくり出すためのクラス付け
-      // 一度強制リフローを挟む or 少しだけ待つとアニメがスムーズに効く
-      pointImage.offsetWidth; 
+      pointImage.offsetWidth;
       pointImage.classList.add('show');
       // ▲ 修正ここまで
     }
@@ -231,7 +276,6 @@
       alert("現在処理中です。少々お待ちください。");
       throw new Error("スキャン中に再度のスキャンを防止しました。");
     }
-
     isScanning = true;
 
     fetch(scriptUrl)
@@ -248,7 +292,7 @@
 
     localStorage.setItem(scanCountKey, scanCount);
 
-    const closeDelay = scanCount % 2 !== 0 ? 5000 : 7000;
+    const closeDelay = scanCount % 2 !== 0 ? 5000 : 25000;
     setTimeout(() => {
       if (window.opener && typeof window.opener.notifyTabClosed === 'function') {
         window.opener.notifyTabClosed();
@@ -258,27 +302,6 @@
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
