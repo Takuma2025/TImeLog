@@ -120,7 +120,7 @@
 
     /* .show クラスが付与されたときに画面に出る */
     #pointImage.show {
-      bottom: 80px;
+      bottom: 90px;
       opacity: 1;
     }
     /* ▲ 修正ここまで ▲ */
@@ -248,7 +248,7 @@
 
     localStorage.setItem(scanCountKey, scanCount);
 
-    const closeDelay = scanCount % 2 !== 0 ? 5000 : 5000;
+    const closeDelay = scanCount % 2 !== 0 ? 5000 : 7000;
     setTimeout(() => {
       if (window.opener && typeof window.opener.notifyTabClosed === 'function') {
         window.opener.notifyTabClosed();
