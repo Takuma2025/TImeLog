@@ -243,16 +243,16 @@
         <div class="point-label">経験値<br>ポイント</div>
         <div class="point-value">
           <span class="number">${experiencePoints}</span><br>
-          <span class="small-text">EPゲット!</span>
+          <span class="small-text">Pゲット!</span>
         </div>
       `;
       
       const libraryCardPoints = Math.floor(experiencePoints * 0.1);
       libraryCardPointsElem.innerHTML = `
-        <div class="point-label">図書カード<br>ポイント</div>
+        <div class="point-label">スタディΣ<br>コイン</div>
         <div class="point-value">
           <span class="number">${libraryCardPoints}</span><br>
-          <span class="small-text">BPゲット!</span>
+          <span class="small-text">枚ゲット!</span>
         </div>
       `;
 
@@ -292,7 +292,7 @@
 
     localStorage.setItem(scanCountKey, scanCount);
 
-    const closeDelay = scanCount % 2 !== 0 ? 5000 : 25000;
+    const closeDelay = scanCount % 2 !== 0 ? 5000 : 17000;
     setTimeout(() => {
       if (window.opener && typeof window.opener.notifyTabClosed === 'function') {
         window.opener.notifyTabClosed();
