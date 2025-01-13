@@ -249,7 +249,7 @@
       
       const libraryCardPoints = Math.floor(experiencePoints * 0.1);
       libraryCardPointsElem.innerHTML = `
-        <div class="point-label">スタディΣ<br>コイン</div>
+        <div class="point-label">シグマ<br>コイン</div>
         <div class="point-value">
           <span class="number">${libraryCardPoints}</span><br>
           <span class="small-text">枚ゲット!</span>
@@ -292,7 +292,7 @@
 
     localStorage.setItem(scanCountKey, scanCount);
 
-    const closeDelay = scanCount % 2 !== 0 ? 5000 : 17000;
+    const closeDelay = scanCount % 2 !== 0 ? 5000 : 7000;
     setTimeout(() => {
       if (window.opener && typeof window.opener.notifyTabClosed === 'function') {
         window.opener.notifyTabClosed();
