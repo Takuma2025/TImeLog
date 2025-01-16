@@ -163,7 +163,7 @@
   <div id="status-container">
     <div id="status"></div>
   </div>
-  <div id="reminder">今日もがんばろう！</div>
+  <div id="reminder">手帳に「今日やること✅」は書いてる？</div>
   <div id="studyTime"></div>
   
   <!-- ▼ 経験値ポイントと図書カードポイント表示用コンテナ ▼ -->
@@ -311,7 +311,7 @@
   
     localStorage.setItem(scanCountKey, scanCount);
   
-    const closeDelay = scanCount % 2 !== 0 ? 5000 : 12000;
+    const closeDelay = scanCount % 2 !== 0 ? 8000 : 12000;
     setTimeout(() => {
       if (window.opener && typeof window.opener.notifyTabClosed === 'function') {
         window.opener.notifyTabClosed();

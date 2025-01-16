@@ -9,20 +9,19 @@
   <style>
     /* 基本設定 */
     body {
-  background: url('back.jpg') no-repeat center center fixed; /* 背景画像を設定 */
-  background-size: cover; /* 画像を全画面にリサイズ */
-  color: #FFFFFF;
-  font-family: "メイリオ", meiryo, sans-serif;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  margin: 0;
-  padding: 20px;
-  box-sizing: border-box;
-}
-
+      background: url('back.jpg') no-repeat center center fixed; /* 背景画像を設定 */
+      background-size: cover; /* 画像を全画面にリサイズ */
+      color: #FFFFFF;
+      font-family: "メイリオ", meiryo, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: none;
+      padding: 20px;
+      box-sizing: border-box;
+    }
 
     /* コンテナのスタイル */
     .container {
@@ -37,15 +36,15 @@
 
     /* 見出しのスタイル */
     h1, h2 {
-      margin: 10px 0;
+      margin: 5px 0;
       font-weight: normal;
     }
 
     h1 {
       font-size: 2em;
-      margin-bottom: 20px;
-      border-bottom: 2px solid rgba(255, 255, 255, 0.3);
-      padding-bottom: 10px;
+      margin-bottom: 10px;
+      border-bottom: 3px solid rgba(255, 255, 255, 0.3);
+      padding-bottom: 3px;
     }
 
     h2 {
@@ -61,36 +60,36 @@
       color: #ffffff;
       padding: 15px 30px;
       font-size: 24px;
-      text-decoration: none;
+      text-decoration: none;      
+      box-shadow: 0 3px 5px rgba(52, 51, 51, 0.751);
       border-radius: 8px;
-      margin-top: 30px;
+      margin-top: 20px;
       transition: background-color 0.3s ease;
     }
 
     #video-container {
-  position: relative;
-  height: 600px;
-  width: 100%; /* 親要素の幅に合わせる */
-  max-width: 600px; /* 最大幅を設定 */
-  aspect-ratio: 16 / 9; /* アスペクト比を指定（16:9の場合） */
-  border: 3px solid #FFFFFF; /* 白い枠線 */
-  border-radius: 12px; /* 角を丸くする */
-  box-sizing: border-box; /* 枠線を含めてサイズを計算 */
-  background-color: #000; /* 映像の背景色（黒） */
-  display: flex; /* フレックスボックスを使用 */
-  align-items: center; /* 垂直方向で中央揃え */
-  justify-content: center; /* 水平方向で中央揃え */
-  margin: auto; /* 上下左右のマージンを自動に設定 */
-}
+      position: relative;
+      height: 600px;
+      width: 100%; /* 親要素の幅に合わせる */
+      max-width: 600px; /* 最大幅を設定 */
+      aspect-ratio: 16 / 9; /* アスペクト比を指定（16:9の場合） */
+      border: 6px solid #00ff00; /* 白い枠線 */
+      border-radius: 15px; /* 角を丸くする */
+      box-sizing: border-box; /* 枠線を含めてサイズを計算 */
+      background-color: #000; /* 映像の背景色（黒） */
+      display: flex; /* フレックスボックスを使用 */
+      align-items: center; /* 垂直方向で中央揃え */
+      justify-content: center; /* 水平方向で中央揃え */
+      margin: auto; /* 上下左右のマージンを自動に設定 */
+    }
 
-#video {
-  width: 100%; /* 親要素に対して幅を100% */
-  height: 100%; /* 親要素の高さを100%に合わせる */
-  object-fit: cover; /* 映像を親要素にフィットさせる（縦横比を維持） */
-  border-radius: 8px; /* 枠線の角に合わせて映像も丸くする */
-  box-sizing: border-box; /* 枠線を含めたサイズ計算 */
-}
-
+    #video {
+      width: 100%; /* 親要素に対して幅を100% */
+      height: 100%; /* 親要素の高さを100%に合わせる */
+      object-fit: cover; /* 映像を親要素にフィットさせる（縦横比を維持） */
+      border-radius: 8px; /* 枠線の角に合わせて映像も丸くする */
+      box-sizing: border-box; /* 枠線を含めたサイズ計算 */
+    }
 
     /* スキャン結果とインジケーターの親要素のスタイル */
     .scan-status {
@@ -103,16 +102,17 @@
 
     /* 現在時刻のスタイル */
     #currentTime {
-      margin-top: 20px;
-      margin-bottom: 20px;
-      font-size: 1.2em;
+      margin-top: none;
+      margin-bottom: 8px;
+      font-size: 4em;
+      font-family: 'Times New Roman', Times, serif;
       color: #FFFFFF; /* 白色 */
     }
 
-    /* 時計アイコンのスタイル */
-    #currentTime i {
-      margin-right: 10px;
-      font-size: 2em; /* アイコンのサイズ */
+    /* 秒数だけ小さく表示するためのクラス */
+    #currentTime .seconds {
+      font-size: 0.6em; /* 必要に応じて調整 */
+      margin-left: 5px; /* 分との間に少し余白 */
     }
 
     /* アニメーション定義 */
@@ -133,42 +133,41 @@
       display: none;
     }
 
-/* 動く横線のスタイル */
-.scan-line {
-  position: absolute;
-  top: -4px; /* 初期位置は画面の上に設定 */
-  left: 50%; /* 横線を中央揃えにする */
-  width: 100%;
-  height: 4px;
-  background: linear-gradient(
-    to right,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(75, 255, 62, 0.8) 50%,
-    rgba(255, 255, 255, 0) 100%
-  ); /* 光のようなグラデーション */
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.6); /* 光のぼやけ効果 */
-  animation: scanLineAnimation 4s infinite ease-in-out; /* 加速・減速を追加 */
-  transform: translateX(-50%); /* 中央揃え */
-}
+    /* 動く横線のスタイル */
+    .scan-line {
+      position: absolute;
+      top: -4px; /* 初期位置は画面の上に設定 */
+      left: 50%; /* 横線を中央揃えにする */
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(
+        to right,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(75, 255, 62, 0.8) 50%,
+        rgba(255, 255, 255, 0) 100%
+      ); /* 光のようなグラデーション */
+      box-shadow: 0 0 8px rgba(255, 255, 255, 0.6); /* 光のぼやけ効果 */
+      animation: scanLineAnimation 4s infinite ease-in-out; /* 加速・減速を追加 */
+      transform: translateX(-50%); /* 中央揃え */
+    }
 
-/* 横線のアニメーション（上から下に進む） */
-@keyframes scanLineAnimation {
-  0% {
-    top: -1px; /* 少し上から始まる */
-  }
-  50% {
-    background: linear-gradient(
-      to right,
-      rgba(255, 255, 255, 0) 0%,
-      rgba(75, 255, 62, 0.8) 50%,
-      rgba(255, 255, 255, 0) 100%
-    ); /* スキャン中に光を強める */
-  }
-  100% {
-    top: 99%; /* 画面の下に到達 */
-  }
-}
-
+    /* 横線のアニメーション（上から下に進む） */
+    @keyframes scanLineAnimation {
+      0% {
+        top: -1px; /* 少し上から始まる */
+      }
+      50% {
+        background: linear-gradient(
+          to right,
+          rgba(255, 255, 255, 0) 0%,
+          rgba(75, 255, 62, 0.8) 50%,
+          rgba(255, 255, 255, 0) 100%
+        ); /* スキャン中に光を強める */
+      }
+      100% {
+        top: 99%; /* 画面の下に到達 */
+      }
+    }
 
     /* レスポンシブ対応 */
     @media (max-width: 600px) {
@@ -194,7 +193,7 @@
       }
 
       /* 現在時刻の数字部分のスタイル（レスポンシブ対応） */
-      #currentTime i {
+      #currentTime .time {
         font-size: 1.5em; /* 小さい画面では少し小さく */
       }
     }
@@ -226,32 +225,13 @@
 
     <h1>自習時間記録システム</h1>
 
-    <!-- 現在時刻を表示する要素（時計アイコンと時間） -->
-<div id="currentTime">
-  <i class="fas fa-clock"></i>
-  <span class="time">00:00:00</span> <!-- 時刻はJavaScriptで動的に変更されます -->
-</div>
+    <!-- 日付・曜日を表示する要素 -->
+    <div id="currentDate" style="font-size:1.5em; color:#FFFFFF;"></div>
 
-<style>
-  /* 現在時刻のスタイル */
-  #currentTime {
-    margin-top: 20px;
-    font-size: 1.2em;
-    color: #FFFFFF; /* 白色 */
-  }
-
-  /* 時計アイコンのスタイル */
-  #currentTime i {
-    margin-right: 10px;
-    font-size: 2em; /* アイコンのサイズ */
-  }
-
-  /* 現在時刻の数字部分のスタイル */
-  #currentTime .time {
-    font-size: 2em; /* 文字を大きく */
-    font-family: Arial, sans-serif;
-  }
-</style>
+    <!-- 現在時刻（時計アイコン削除済み） -->
+    <div id="currentTime">
+      <span class="time">00:00</span><span class="seconds">00</span> <!-- JSで動的に変更 -->
+    </div>
 
     <!-- カメラ映像 -->
     <div id="video-container" style="position: relative;">
@@ -313,7 +293,7 @@
       const scanThreshold = 3; // 3フレーム連続で同じデータが検出された場合にスキャンを確定
 
       // カメラ起動
-      navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } }) // フロントカメラを使用
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
         .then(stream => {
           video.srcObject = stream;
           video.play();
@@ -351,50 +331,49 @@
                 scanCount += 1;
                 console.log(`同じQRコード "${code.data}" が連続して検出されました (${scanCount}回目)`);
               } else {
-                  lastScannedData = code.data;
-                  scanCount = 1;
-                  console.log(`新しいQRコード "${code.data}" が検出されました`);
-                }
-      
-                if (scanCount >= scanThreshold && !isHandlingScan && (resultTab === null || resultTab.closed)) {
-                  // スキャン処理中に設定（即座にフラグを設定）  
-                  isHandlingScan = true;
-                  scanHistory.set(code.data, currentTime); // スキャン時刻を更新
-                  output.textContent = ''; // 結果を消去
-                  scanningIndicator.style.display = 'none';
-
-                  // ビープ音を鳴らす
-                  playBeepSound();
-
-                  // 別タブを開く。「newtab.html?data=◯◯」にクエリパラメータを渡す
-                  const newTabUrl = `newtab.html?data=${encodeURIComponent(code.data)}`;
-                  resultTab = window.open(newTabUrl, "resultTab"); // 名前付きウィンドウを使用
-          
-                  if (resultTab) {
-                    // タブが正常に開かれた場合
-                    console.log("新しいタブを開きました:", newTabUrl);
-                  } else {
-                    // ポップアップブロックなどでタブが開けなかった場合
-                    console.error("タブを開けませんでした。ポップアップブロックが有効か確認してください。");
-                    isHandlingScan = false;
-                    scanningIndicator.style.display = 'block';
-                    output.textContent = "タブを開けませんでした。ポップアップブロックを確認してください。";
-                  }
-          
-                  // スキャン処理をリセットするタイマーを設定（念のため）  
-                  setTimeout(() => {
-                    // フラグがリセットされていない場合は強制的にリセット
-                    if (isHandlingScan) {
-                      isHandlingScan = false;
-                      output.textContent = "";
-                      scanningIndicator.style.display = 'block';
-                    }
-                  }, 5000); // 5秒後に再スキャンを許可（必要に応じて調整）
-                }
-              } else {
-                // クールダウン中のスキャンを無視
-                console.log(`QRコード "${code.data}" はクールダウン中のためスキャンを無視しました。`);
+                lastScannedData = code.data;
+                scanCount = 1;
+                console.log(`新しいQRコード "${code.data}" が検出されました`);
               }
+      
+              if (scanCount >= scanThreshold && !isHandlingScan && (resultTab === null || resultTab.closed)) {
+                // スキャン処理中に設定
+                isHandlingScan = true;
+                scanHistory.set(code.data, currentTime);
+                output.textContent = '';
+                scanningIndicator.style.display = 'none';
+
+                // ビープ音を鳴らす
+                playBeepSound();
+
+                // 別タブを開く
+                const newTabUrl = `newtab.html?data=${encodeURIComponent(code.data)}`;
+                resultTab = window.open(newTabUrl, "resultTab");
+        
+                if (resultTab) {
+                  // タブが正常に開いた場合
+                  console.log("新しいタブを開きました:", newTabUrl);
+                } else {
+                  // ポップアップブロックなど
+                  console.error("タブを開けませんでした。ポップアップブロックが有効か確認してください。");
+                  isHandlingScan = false;
+                  scanningIndicator.style.display = 'block';
+                  output.textContent = "タブを開けませんでした。ポップアップブロックを確認してください。";
+                }
+        
+                // スキャン処理をリセットするタイマー
+                setTimeout(() => {
+                  if (isHandlingScan) {
+                    isHandlingScan = false;
+                    output.textContent = "";
+                    scanningIndicator.style.display = 'block';
+                  }
+                }, 5000);
+              }
+            } else {
+              // クールダウン中のスキャンを無視
+              console.log(`QRコード "${code.data}" はクールダウン中のためスキャンを無視しました。`);
+            }
           } else {
             // QRコードが検出されていない場合はリセット
             lastScannedData = null;
@@ -419,19 +398,32 @@
         }
       }
 
-      // クリーンアップを定期的に実行
+      // 定期的にクリーンアップを実行
       setInterval(cleanupScanHistory, CLEANUP_INTERVAL);
 
-      // 現在時刻を取得して表示する関数
+      // 現在の日付・時刻を取得して表示する関数
       function updateCurrentTime() {
         const now = new Date();
         const hours = String(now.getHours()).padStart(2, '0');
         const minutes = String(now.getMinutes()).padStart(2, '0');
         const seconds = String(now.getSeconds()).padStart(2, '0');
-        const formattedTime = `${hours}:${minutes}:${seconds}`;
         
-        // 数字部分を<span>で囲んでinnerHTMLに設定
-        document.getElementById('currentTime').innerHTML = `<i class="fas fa-clock"></i> <span class="time">${formattedTime}</span>`;
+        // 「HH:MM」 + 「(小さい文字で)秒数」の形でコロンを省略
+        const hhmmHtml = `<span class="time">${hours}:${minutes}</span>`;
+        const ssHtml   = `<span class="seconds">${seconds}</span>`;
+
+        // 現在時刻要素へ反映
+        document.getElementById('currentTime').innerHTML = hhmmHtml + ssHtml;
+
+        // 曜日を (日, 月, 火, 水, 木, 金, 土) の省略形で取得
+        const daysOfWeek = ["日", "月", "火", "水", "木", "金", "土"];
+        const dayOfWeek = daysOfWeek[now.getDay()];
+
+        // 日付を「YYYY年M月D日 (木)」形式で表示
+        const dateString = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 (${dayOfWeek})`;
+
+        // 日付と曜日を表示
+        document.getElementById('currentDate').textContent = dateString;
       }
 
       // ページ読み込み時に時刻を表示し、1秒ごとに更新
@@ -440,9 +432,11 @@
         setInterval(updateCurrentTime, 1000); // 1秒ごとに更新
       };
 
-      // グローバルスコープで notifyTabClosed 関数を公開
+      // グローバルスコープで notifyTabClosed 関数を公開（※必要な場合のために存在）
       window.notifyTabClosed = notifyTabClosed;
     </script>
   </div>
 </body>
 </html>
+
+
