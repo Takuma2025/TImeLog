@@ -76,7 +76,7 @@
     }
     #studyTime .value {
       font-size: 2em;
-      color: #33ff28;
+      color: #2eff1b;
     }
 
     /* ▼ 経験値ポイントと図書カードポイント表示用のスタイル ▼ */
@@ -91,8 +91,9 @@
     #experiencePoints {
       text-align: center;
       padding: 15px;
-      border-radius: 8px;
+      border-radius: 20px;
       background-color: rgba(60, 245, 255, 0.2);
+      border: 5px solid #00ddff; /* 枠線 */
       flex: 1;
       margin: 0 10px;
     }
@@ -106,8 +107,9 @@
     #libraryCardPoints {
       text-align: center;
       padding: 15px;
-      border-radius: 8px;
+      border-radius: 20px;
       background-color: rgba(255, 255, 157, 0.231);
+      border: 5px solid #eeff00; /* 枠線 */
       flex: 1;
       margin: 0 10px;
     }
@@ -163,7 +165,7 @@
   <div id="status-container">
     <div id="status"></div>
   </div>
-  <div id="reminder">手帳に「今日やること✅」は書いてる？</div>
+  <div id="reminder"></div> <!--開始表示のときのコメントはここで編集-->
   <div id="studyTime"></div>
   
   <!-- ▼ 経験値ポイントと図書カードポイント表示用コンテナ ▼ -->
@@ -244,10 +246,11 @@
         displayTime += `${remainingSeconds}秒`;
 
         studyTimeElem.innerHTML = `
-  <span class="label">記録した自習時間</span>
-  <span class="value">
-    <i class="fas fa-hourglass-half"></i> ${displayTime} <!-- アイコンを左に配置 -->
-  </span>
+<span class="label">記録した自習時間</span>
+<span class="value">
+  <i class="fas fa-stopwatch"></i> ${displayTime} <!-- ストップウォッチアイコンを左に配置 -->
+</span>
+
 `;
 
         experiencePoints = studyTimeSeconds;
@@ -288,7 +291,7 @@
     studentIdElem.textContent = `自習ID: ${studentId}`;
   
     const encodedStudentId = encodeURIComponent(studentId);
-    const scriptUrl = `https://script.google.com/macros/s/AKfycbzhBvWFMzU1Gz9Q1RDD7MnYTbJCuWHXU8YAeTHvTiGvs8sF4eEAZVDc79l61UjIJ3Bn/exec?studentId=${encodedStudentId}`;
+    const scriptUrl = `https://script.google.com/macros/s/AKfycbwa7QQnP0byHlc8-856e5h_joib0KuZqDX4IdVUBrQnBAEDzZiZlayx0UThloV_CNFu/exec?studentId=${encodedStudentId}`;
     let isScanning = false;
   
     if (isScanning) {
