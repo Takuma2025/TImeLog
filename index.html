@@ -433,10 +433,32 @@
       };
 
       // グローバルスコープで notifyTabClosed 関数を公開（※必要な場合のために存在）
-      window.notifyTabClosed = notifyTabClosed;
+      // window.notifyTabClosed = notifyTabClosed; // (コメントアウトのまま)
+
+      // ↓↓↓ ここから追加部分 ↓↓↓
+
+      // タブを閉じさせたくない場合の条件判定（サンプル：常に false）
+      function isConditionMet() {
+        // ここに「タブを閉じてもよい」条件を実装する
+        // 例: あるフラグが true になったらOKなど
+        return false;
+      }
+
+      // beforeunloadイベントで「本当に閉じますか？」の確認ダイアログを出す
+      window.addEventListener('beforeunload', function (e) {
+        // 条件を満たしていない場合のみダイアログ表示
+        if (!isConditionMet()) {
+          e.preventDefault();
+          // Chrome などではカスタムメッセージは表示されず、returnValue=''; を設定しても
+          // 標準の文言しか出ません。以下は形式上残しているだけです。
+          e.returnValue = '';
+        }
+      });
+      // ↑↑↑ 追加ここまで ↑↑↑
     </script>
   </div>
 </body>
 </html>
+
 
 
