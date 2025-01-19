@@ -2,6 +2,44 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <title>横スクロール掲示板</title>
+  <style>
+    #scrollingBoard {
+      position: fixed;
+      top: 10px; /* カメラの上部付近に配置 */
+      left: 0;
+      width: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      color: #FFFFFF;
+      font-size: 1.5em;
+      padding: 10px 0;
+      overflow: hidden;
+      z-index: 999;
+    }
+
+    #scrollingBoard .content {
+      display: inline-block;
+      white-space: nowrap;
+      animation: scroll 15s linear infinite;
+    }
+
+    @keyframes scroll {
+      0% {
+        transform: translateX(100%);
+      }
+      100% {
+        transform: translateX(-100%);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="scrollingBoard">
+    <div class="content">自習を始める前に、手帳に<b>今日やること</b>を書き出そう。</div>
+  </div>
+
+  <meta charset="UTF-8">
   <title>QRコード読み取り</title>
   <!-- Font Awesome CDN追加 -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
