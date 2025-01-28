@@ -130,24 +130,6 @@
     }
     /* ▲ ここまで ▲ */
 
-    /* ▼ point.png 下からゆっくり出す用の修正 ▼ */
-    #pointImage {
-      display: none;                   /* 最初は非表示 */
-      position: fixed;
-      left: 50%;
-      transform: translateX(-50%);
-      max-width: 800px;
-      height: auto;
-      z-index: 1000;
-      bottom: -200px;                  /* 初期状態は画面外(下) */
-      transition: bottom 1.5s ease;
-    }
-    #pointImage.show {
-      bottom: 90px;
-      opacity: 1;
-    }
-    /* ▲ 修正ここまで ▲ */
-
     @media (max-width: 600px) {
       h1 {
         font-size: 1.5em;
@@ -178,24 +160,24 @@
   <div id="badge"></div>
   <div id="studentId"></div>
 
-  <img id="pointImage" src="point.png" alt="ポイント画像">
+  <!-- point.png（浮き上がる演出用画像）は削除 -->
 
   <script>
     const params = new URLSearchParams(location.search);
     const data = params.get('data') || "";
-  
+
     function extractStudentId(data) {
       const match = data.match(/studentId=(\S+)/);
       return match ? match[1] : '見つかりませんでした';
     }
-  
+
     const studentId = extractStudentId(data);
     const scanCountKey = `scanCount_${studentId}`;
     const startTimeKey = `startTime_${studentId}`;
-  
+
     let scanCount = parseInt(localStorage.getItem(scanCountKey)) || 0;
     scanCount++;
-  
+
     const statusElem = document.getElementById('status');
     const statusContainer = document.getElementById('status-container');
     const messageElem = document.getElementById('message');
@@ -204,9 +186,9 @@
     const libraryCardPointsElem = document.getElementById('libraryCardPoints');
     const reminderElem = document.getElementById('reminder');
     const pointsContainer = document.getElementById('pointsContainer');
-  
+
     let experiencePoints = 0;
-  
+
     if (scanCount % 2 !== 0) {
         // 開始時はポイント表示コンテナを非表示に
         pointsContainer.style.display = 'none';
@@ -217,7 +199,7 @@
 
         const startTime = new Date();
         localStorage.setItem(startTimeKey, startTime.toISOString());
-      } else {
+    } else {
         // 終了時はポイント表示コンテナを表示
         pointsContainer.style.display = 'flex';
 
@@ -250,7 +232,6 @@
 <span class="value">
   <i class="fas fa-stopwatch"></i> ${displayTime} <!-- ストップウォッチアイコンを左に配置 -->
 </span>
-
 `;
 
         experiencePoints = studyTimeSeconds;
@@ -277,29 +258,21 @@
             <span class="small-text">枚ゲット</span>
           </div>
         `;
-
-        const pointImage = document.getElementById('pointImage');
-        pointImage.style.display = 'block';
-
-        // ▼ 下からゆっくり出すためのクラス付け
-        pointImage.offsetWidth;
-        pointImage.classList.add('show');
-      // ▲ 修正ここまで
     }
-  
+
     const studentIdElem = document.getElementById('studentId');
     studentIdElem.textContent = `自習ID: ${studentId}`;
-  
+
     const encodedStudentId = encodeURIComponent(studentId);
     const scriptUrl = `https://script.google.com/macros/s/AKfycbwa7QQnP0byHlc8-856e5h_joib0KuZqDX4IdVUBrQnBAEDzZiZlayx0UThloV_CNFu/exec?studentId=${encodedStudentId}`;
     let isScanning = false;
-  
+
     if (isScanning) {
       alert("現在処理中です。少々お待ちください。");
       throw new Error("スキャン中に再度のスキャンを防止しました。");
     }
     isScanning = true;
-  
+
     fetch(scriptUrl)
       .then(response => response.text())
       .then(data => {
@@ -311,9 +284,9 @@
       .finally(() => {
         isScanning = false;
       });
-  
+
     localStorage.setItem(scanCountKey, scanCount);
-  
+
     const closeDelay = scanCount % 2 !== 0 ? 8000 : 12000;
     setTimeout(() => {
       if (window.opener && typeof window.opener.notifyTabClosed === 'function') {
@@ -322,4 +295,5 @@
       window.close();
     }, closeDelay);
   </script>
-  
+</body>
+</html>
