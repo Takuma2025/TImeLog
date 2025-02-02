@@ -186,6 +186,29 @@
         beepSound.play();
       }
 
+      /*** ▼ 追加: スキャン履歴・クールダウン関連の設定 ▼ ***/
+      const scanHistory = new Map();    // 「コード → 最終スキャン時刻」
+      const SCAN_COOLDOWN = 3000;       // 3秒間は同じコードを無視（必要に応じて変更）
+      const CLEANUP_INTERVAL = 10000;   // 10秒ごとにスキャン履歴をクリーンアップ
+
+      /**
+       * スキャン履歴をクリーンアップする関数
+       */
+      function cleanupScanHistory() {
+        const currentTime = Date.now();
+        for (const [data, timestamp] of scanHistory.entries()) {
+          // 最終スキャン時刻から一定時間経過したら削除
+          if (currentTime - timestamp > SCAN_COOLDOWN) {
+            scanHistory.delete(data);
+            console.log(`スキャン履歴から "${data}" を削除しました。`);
+          }
+        }
+      }
+      // 定期的にクリーンアップを実行
+      setInterval(cleanupScanHistory, CLEANUP_INTERVAL);
+      /*** ▲ 追加ここまで ▲ ***/
+
+
       const video = document.getElementById('video');
       const canvas = document.getElementById('canvas');
       const ctx = canvas.getContext('2d');
@@ -196,7 +219,8 @@
       let resultTab = null;
       let lastScannedData = null;
       let scanCount = 0;
-      const scanThreshold = 1; // デバッグ用に1フレームでOKにする
+      // デバッグ用。1フレーム検知でOKだが、連続スキャンを抑えるためクールダウンで制御する。
+      const scanThreshold = 1;  
 
       navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
         .then(stream => {
@@ -219,44 +243,57 @@
           const code = jsQR(imageData.data, imageData.width, imageData.height);
           
           if (code) {
-            // 同じQRが続けて検出されたか確認
-            if (code.data === lastScannedData) {
-              scanCount++;
-              console.log(`同じQRコード "${code.data}" が連続して検出 (${scanCount}回目)`);
-            } else {
-              lastScannedData = code.data;
-              scanCount = 1;
-              console.log(`新しいQRコード "${code.data}" が検出されました`);
-            }
-            
-            // 閾値以上連続検出 & まだ処理していなければ
-            if (scanCount >= scanThreshold && !isHandlingScan && (resultTab === null || resultTab.closed)) {
-              isHandlingScan = true;
-              output.textContent = '';
-              scanningIndicator.style.display = 'none';
-              playBeepSound();
-              
-              // 別タブを開く（ポップアップブロッカーに注意）
-              const newTabUrl = `newtab.html?data=${encodeURIComponent(code.data)}`;
-              resultTab = window.open(newTabUrl, "resultTab");
-              if (!resultTab) {
-                console.error("タブを開けませんでした。ポップアップブロックを確認してください。");
-                isHandlingScan = false;
-                scanningIndicator.style.display = 'block';
-                output.textContent = "タブを開けませんでした。ポップアップブロックを確認してください。";
+            // まず、クールダウン中でないかどうかを判定
+            const now = Date.now();
+            const lastTime = scanHistory.get(code.data) || 0;
+            // SCAN_COOLDOWN 経過後なら「新規スキャン」とみなす
+            if (now - lastTime > SCAN_COOLDOWN) {
+              // スキャン履歴に登録（更新）
+              scanHistory.set(code.data, now);
+
+              // 以下は既存の連続検出チェック
+              if (code.data === lastScannedData) {
+                scanCount++;
+                console.log(`同じQRコード "${code.data}" が連続して検出 (${scanCount}回目)`);
+              } else {
+                lastScannedData = code.data;
+                scanCount = 1;
+                console.log(`新しいQRコード "${code.data}" が検出されました`);
               }
               
-              setTimeout(() => {
-                if (isHandlingScan) {
+              // 閾値以上連続検出 & まだ処理していなければ
+              if (scanCount >= scanThreshold && !isHandlingScan && (resultTab === null || resultTab.closed)) {
+                isHandlingScan = true;
+                output.textContent = '';
+                scanningIndicator.style.display = 'none';
+                playBeepSound();
+                
+                // 別タブを開く（ポップアップブロッカーに注意）
+                const newTabUrl = `newtab.html?data=${encodeURIComponent(code.data)}`;
+                resultTab = window.open(newTabUrl, "resultTab");
+                if (!resultTab) {
+                  console.error("タブを開けませんでした。ポップアップブロックを確認してください。");
                   isHandlingScan = false;
                   scanningIndicator.style.display = 'block';
+                  output.textContent = "タブを開けませんでした。ポップアップブロックを確認してください。";
                 }
-              }, 5000);
+                
+                // 5秒後にスキャン再開（はやめたければ短縮可）
+                setTimeout(() => {
+                  if (isHandlingScan) {
+                    isHandlingScan = false;
+                    scanningIndicator.style.display = 'block';
+                  }
+                }, 5000);
+              }
+            } else {
+              // まだクールダウン中なので何もしない
+              // console.log("クールダウン中のため、同一QRコードは無視");
             }
           } else {
+            // QRコード未検出の場合
             lastScannedData = null;
             scanCount = 0;
-            // console.log("QRコード未検出");
           }
         }
         requestAnimationFrame(scanLoop);
@@ -305,7 +342,8 @@
           });
       }
       
-      setInterval(updateStudyCount, 15000);
+      // 10秒ごとに人数を取得（必要に応じて変更可）
+      setInterval(updateStudyCount, 10000);
 
       // 子タブが閉じられた時のコールバック
       window.notifyTabClosed = function() {
@@ -315,6 +353,7 @@
   </div>
 </body>
 </html>
+
 
 
 
