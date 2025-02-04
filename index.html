@@ -176,6 +176,11 @@
       <b>自習時間の記録</b>を見る
     </a>
     
+    <!-- 追加：音声有効化ボタン -->
+    <button id="enable-sound-button" style="display:block; margin: 20px auto; background-color: #ffffff; color: #000000; padding: 5px 10px; font-size: 15px; border: none; border-radius: 5px; cursor: pointer; transition: background-color 0.3s ease;">
+      音声を有効化する
+    </button>
+    
     <!-- jsQR ライブラリ読み込み -->
     <script src="jsQR.min.js"></script>
     <script>
@@ -207,7 +212,6 @@
       // 定期的にクリーンアップを実行
       setInterval(cleanupScanHistory, CLEANUP_INTERVAL);
       /*** ▲ 追加ここまで ▲ ***/
-
 
       const video = document.getElementById('video');
       const canvas = document.getElementById('canvas');
@@ -349,6 +353,19 @@
       window.notifyTabClosed = function() {
         console.log("子タブが閉じられました。");
       };
+
+      // 追加: 音声有効化ボタンの処理
+      document.getElementById('enable-sound-button').addEventListener('click', function() {
+        beepSound.play().then(() => {
+          beepSound.pause();
+          beepSound.currentTime = 0;
+          // ボタンを非表示にする
+          this.style.display = 'none';
+          console.log("音声が有効化されました。");
+        }).catch((error) => {
+          console.error("音声有効化エラー:", error);
+        });
+      });
     </script>
   </div>
 </body>
